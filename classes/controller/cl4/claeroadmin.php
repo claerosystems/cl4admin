@@ -3,7 +3,7 @@
 /**
 * This controller handles the features of add, edit, delete, etc. of database records
 */
-class Controller_ClaeroAdmin extends Controller_Base {
+class Controller_cl4_ClaeroAdmin extends Controller_Base {
 	protected $db_group = NULL; // the default database config to use, needed for when a specific model is not loaded
 	protected $model_name = NULL; // the name of the model currently being manipulated
 	protected $model_display_name = NULL; // the fulll, friendly object name as specified in the options or the model itself
