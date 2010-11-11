@@ -376,7 +376,7 @@ class Controller_cl4_ClaeroAdmin extends Controller_Base {
 			} else {
 				$this->template->body_html .= '<h2>Delete Item in ' . HTML::chars($this->model_display_name) . '</h2>';
 
-				Message::add(View::factory('claero/claeroadmin/confirm_delete', array(
+				Message::add(View::factory('cl4/claeroadmin/confirm_delete', array(
 					'object_name' => $this->model_display_name,
 				)));
 
@@ -535,7 +535,7 @@ EOA;
 			asort($model_list);
 			$model_select = Form::select('model', $model_list, $this->model_name, array('id' => 'cl4_model_select'));
 
-			$return_html = View::factory('claero/claeroadmin/header', array(
+			$return_html = View::factory('cl4/claeroadmin/header', array(
 				'model_select' => $model_select,
 				'form_action' => URL::site(Request::current()->uri()) . URL::query(),
 			));
