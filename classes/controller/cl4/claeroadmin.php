@@ -39,13 +39,25 @@ class Controller_cl4_ClaeroAdmin extends Controller_Base {
 		// set the information from the route/get/post parameters
 		$this->model_name = Request::instance()->param('model');
 		$this->id = Request::instance()->param('id');
-		$page_offset = Claero::get_param('page');
-		$sort_column = Claero::get_param('sort_by_column');
-		$sort_order = Claero::get_param('sort_by_order');
+		$page_offset = cl4::get_param('page');
+		$sort_column = cl4::get_param('sort_by_column');
+		$sort_order = cl4::get_param('sort_by_order');
 
 		// check to see the user has permission to access this action
-		// we can't use the default functionality of secure_actions because we have 2 possible permissions
-		if ( ! $this->check_perm()) {
+		// special cases where the permission require is index not the actual action
+		switch ($action) {
+			case 'cancel' :
+			case 'cancel_search' :
+				$perm_action = 'index';
+				break;
+			case 'edit_multiple' :
+				$perm_action = 'edit';
+				break;
+			default :
+				$perm_action = $action;
+		} // switch
+		if ( ! $this->check_perm($perm_action)) {
+			// we can't use the default functionality of secure_actions because we have 2 possible permissions per action: global and per model
 			if ($action != 'index') {
 				Message::add('You don\'t have the correct permissions to access this action.', Message::$error);
 				$this->redirect_to_index();
@@ -73,7 +85,7 @@ class Controller_cl4_ClaeroAdmin extends Controller_Base {
 		} //
 
 		// redirect the user to a different model as they one they selected isn't valid (not in array of models)
-		if ( ! isset($model_list[$this->model_name]) && ((Claero::is_dev() && $action != 'create' && $action != 'modelcreate') || ! Claero::is_dev())) {
+		if ( ! isset($model_list[$this->model_name]) && ((cl4::is_dev() && $action != 'create' && $action != 'modelcreate') || ! cl4::is_dev())) {
 			Message::add('The model you attempted to access (' . $this->model_name . ') doesn\'t exist in the model list defined in the claeroadmin config file.', Message::$debug);
 			Request::instance()->redirect('dbadmin/' . key($model_list) . '/index');
 		}
@@ -132,20 +144,20 @@ class Controller_cl4_ClaeroAdmin extends Controller_Base {
 			if ($this->auto_render) $this->template->page_title = $this->target_object->_table_name_display . ' Administration' . $this->template->page_title;
 
 			// generate the friendly model name used to display to the user
-			$this->model_display_name = ( ! empty($this->target_object->_table_name_display) ? $this->target_object->_table_name_display : Claero::underscores_to_words($this->model_name));
+			$this->model_display_name = ( ! empty($this->target_object->_table_name_display) ? $this->target_object->_table_name_display : cl4::underscores_to_words($this->model_name));
 
 			Message::add('The model `' . $this->model_name . '` was loaded.', Message::$debug);
 
 		} catch (Exception $e) {
 			// display the error message
-			Claero::exception_handler($e);
+			cl4::exception_handler($e);
 			Message::add('There was a problem loading the data.', Message::$error);
 			Message::add('There was a problem loading the table or model: ' . $this->model_name, Message::$debug);
 
 			// display the help view
-			if (Claero::is_dev() && $e->getCode() == 3001) {
+			if (cl4::is_dev() && $e->getCode() == 3001) {
 				Message::add('The model ' . $this->model_name . ' does not exist.', Message::$debug);
-				if ($this->auto_render) {
+				if ($this->auto_render && $this->model_name != key($model_list)) {
 					Request::instance()->redirect('dbadmin/' . key($model_list) . '/modelcreate?' . http_build_query(array('table_name' => $this->model_name)));
 				}
 			} else {
@@ -208,7 +220,7 @@ class Controller_cl4_ClaeroAdmin extends Controller_Base {
 			$this->template->body_html .= $orm_multiple->get_editable_list($options) . EOL;
 			$this->template->body_html .= '</section>' . EOL;
 		} catch (Exception $e) {
-			Claero::exception_handler($e);
+			cl4::exception_handler($e);
 			$this->template->body_html .= 'There was a problem preparing the item list.';
 		}
 	} // function
@@ -230,28 +242,36 @@ class Controller_cl4_ClaeroAdmin extends Controller_Base {
 	public function action_add() {
 		$this->load_model('add');
 
-		// check checking for post within the function
-		$this->save_model();
+		if ( ! empty($_POST)) {
+			$this->save_model();
+		}
 
 		try {
 			$this->template->body_html .= '<h2>Adding a New ' . HTML::chars($this->model_display_name) . ' Item</h2>';
 
 			// display the edit form
-			$this->template->body_html .= $this->target_object->get_form(array(
+			$form_options = array(
 				'mode' => 'add',
-			));
+			);
+			if ( ! empty($this->id)) {
+				// set the form action because the current url includes the id of the record which will cause a update, not an add
+				$form_options['form_action'] = URL::site(Request::current()->uri(array('id' => NULL))) . URL::query();
+			}
+
+			$this->template->body_html .= $this->target_object->get_form($form_options);
 		} catch (Exception $e) {
-			Claero::exception_handler($e);
+			cl4::exception_handler($e);
 			Message::add('There was an error while preparing the add form.', Message::$error);
-			if ( ! Claero::is_dev()) $this->redirect_to_index();
+			if ( ! cl4::is_dev()) $this->redirect_to_index();
 		}
 	} // function action_add
 
 	public function action_edit() {
 		$this->load_model('edit');
 
-		// check checking for post within the function
-		$this->save_model();
+		if ( ! empty($_POST)) {
+			$this->save_model();
+		}
 
 		try {
 			// preload the data if we have an id and this is the edit case
@@ -262,36 +282,34 @@ class Controller_cl4_ClaeroAdmin extends Controller_Base {
 				'mode' => 'edit',
 			));
 		} catch (Exception $e) {
-			Claero::exception_handler($e);
+			cl4::exception_handler($e);
 			Message::add('There was an error while preparing the edit form.', Message::$error);
-			if ( ! Claero::is_dev()) $this->redirect_to_index();
+			if ( ! cl4::is_dev()) $this->redirect_to_index();
 		} // try
 	} // function action_edit
 
 	public function save_model() {
 		try {
-			if ( ! empty($_POST)) {
-				// validate the post data against the model
-				$validation = $this->target_object->save_values()->check();
+			// validate the post data against the model
+			$validation = $this->target_object->save_values()->check();
 
-				if ($validation === TRUE) {
-					// save the record
-					$this->target_object->save();
+			if ($validation === TRUE) {
+				// save the record
+				$this->target_object->save();
 
-					if ($this->target_object->saved()) {
-						Message::add('The item has been saved.', Message::$notice);
-						$this->redirect_to_index();
-					} else {
-						Message::add('There was an error, and the item may not have been saved.', Message::$error);
-					} // if
+				if ($this->target_object->saved()) {
+					Message::add('The item has been saved.', Message::$notice);
+					$this->redirect_to_index();
 				} else {
-					Message::add('The submitted values did not meet the validation requirements: ' . Message::add_validate_errors($validation), Message::$error);
-				}
-			} // if
+					Message::add('There was an error, and the item may not have been saved.', Message::$error);
+				} // if
+			} else {
+				Message::add('The submitted values did not meet the validation requirements: ' . Message::add_validate_errors($validation), Message::$error);
+			}
 		} catch (Exception $e) {
-			Claero::exception_handler($e);
+			cl4::exception_handler($e);
 			Message::add('There was a problem saving the item. All the data may not have been saved.', Message::$error);
-			if ( ! Claero::is_dev()) $this->redirect_to_index();
+			if ( ! cl4::is_dev()) $this->redirect_to_index();
 		} // try
 	} // function save_model
 
@@ -309,9 +327,9 @@ class Controller_cl4_ClaeroAdmin extends Controller_Base {
 			$this->template->body_html .= '<h2>' . HTML::chars($this->model_display_name) . '</h2>';
 			$this->template->body_html .= $this->target_object->get_view();
 		} catch (Exception $e) {
-			Claero::exception_handler($e);
+			cl4::exception_handler($e);
 			Message::add('There was an error while viewing the item.', Message::$error);
-			if ( ! Claero::is_dev()) $this->redirect_to_index();
+			if ( ! cl4::is_dev()) $this->redirect_to_index();
 		}
 	} // function
 
@@ -329,7 +347,7 @@ class Controller_cl4_ClaeroAdmin extends Controller_Base {
 
 					$this->redirect_to_index();
 				} catch (Exception $e) {
-					Claero::exception_handler($e);
+					cl4::exception_handler($e);
 					Message::add('There was an error while saving the records.', Message::$error);
 				}
 			} // if
@@ -337,9 +355,9 @@ class Controller_cl4_ClaeroAdmin extends Controller_Base {
 			$this->template->body_html .= '<h2>Edit Multiple ' . HTML::chars($this->model_display_name) . ' Records</h2>';
 			$this->template->body_html .= $orm_multiple->get_edit_multiple($_POST['ids']);
 		} catch (Exception $e) {
-			Claero::exception_handler($e);
+			cl4::exception_handler($e);
 			Message::add('There was an error while preparing the edit form.', Message::$error);
-			if ( ! Claero::is_dev()) $this->redirect_to_index();
+			if ( ! cl4::is_dev()) $this->redirect_to_index();
 		}
 	} // function
 
@@ -363,9 +381,9 @@ class Controller_cl4_ClaeroAdmin extends Controller_Base {
 							Message::add('Record ID ' . $this->id . ' was deleted or expired.', Message::$debug);
 						} // if
 					} catch (Exception $e) {
-						Claero::exception_handler($e);
+						cl4::exception_handler($e);
 						Message::add('There was an error while deleting the item.', Message::$error);
-						if ( ! Claero::is_dev()) $this->redirect_to_index();
+						if ( ! cl4::is_dev()) $this->redirect_to_index();
 					}
 				} else {
 					Message::add('The item was <em>not</em> deleted.', Message::$notice);
@@ -383,9 +401,9 @@ class Controller_cl4_ClaeroAdmin extends Controller_Base {
 				$this->template->body_html .= $this->target_object->get_view();
 			}
 		} catch (Exception $e) {
-			Claero::exception_handler($e);
+			cl4::exception_handler($e);
 			Message::add('There was an error while preparing the delete form.', Message::$error);
-			if ( ! Claero::is_dev()) $this->redirect_to_index();
+			if ( ! cl4::is_dev()) $this->redirect_to_index();
 		}
 	} // function action_delete
 
@@ -419,7 +437,7 @@ class Controller_cl4_ClaeroAdmin extends Controller_Base {
 				throw new Kohana_Exception('There is no file associated with the record');
 			} // if
 		} catch (Exception $e) {
-			Claero::exception_handler($e);
+			cl4::exception_handler($e);
 			echo 'There was a problem while downloading the file.';
 		}
 	} // function download
@@ -452,9 +470,9 @@ class Controller_cl4_ClaeroAdmin extends Controller_Base {
 				));
 			}
 		} catch (Exception $e) {
-			Claero::exception_handler($e);
+			cl4::exception_handler($e);
 			Message::add('There was an error while preparing the search form.', Message::$error);
-			if ( ! Claero::is_dev()) $this->redirect_to_index();
+			if ( ! cl4::is_dev()) $this->redirect_to_index();
 		}
 	} // function
 
@@ -468,9 +486,9 @@ class Controller_cl4_ClaeroAdmin extends Controller_Base {
 
 			$this->redirect_to_index();
 		} catch (Exception $e) {
-			Claero::exception_handler($e);
+			cl4::exception_handler($e);
 			Message::add('There was an error while problem while clearing the search.', Message::$error);
-			if ( ! Claero::is_dev()) $this->redirect_to_index();
+			if ( ! cl4::is_dev()) $this->redirect_to_index();
 		}
 	} // function
 
@@ -479,8 +497,8 @@ class Controller_cl4_ClaeroAdmin extends Controller_Base {
 	*/
 	public function action_modelcreate() {
 		try {
-			$this->template->body_html = View::factory('claero/modelcreate', array('db_group' => $this->db_group))
-				->set('table_name', Claero::get_param('table_name'));
+			$this->template->body_html = View::factory('cl4/claeroadmin/model_create', array('db_group' => $this->db_group))
+				->set('table_name', cl4::get_param('table_name'));
 
 			$this->template->on_load_js = <<<EOA
 $('#m_table_name').change(function() {
@@ -490,7 +508,7 @@ $('#m_table_name').change(function() {
 });
 EOA;
 		} catch (Exception $e) {
-			Claero::exception_handler($e);
+			cl4::exception_handler($e);
 			Message::add('There was an problem while preparing the model create view.', Message::$error);
 		}
 	} // function
@@ -505,7 +523,7 @@ EOA;
 			// generate a sample model file for the given table based on the database definition
 			$this->request->response = ModelCreate::create_model($this->model_name);
 		} catch (Exception $e) {
-			Claero::exception_handler($e);
+			cl4::exception_handler($e);
 			echo 'There was an error while problem while creating the PHP model.';
 		}
 	} // function
@@ -540,7 +558,7 @@ EOA;
 				'form_action' => URL::site(Request::current()->uri()) . URL::query(),
 			));
 		} catch (Exception $e) {
-			Claero::exception_handler($e);
+			cl4::exception_handler($e);
 			// return an empty string because there is no proper message that can be displayed
 			$return_html = '';
 		}
@@ -571,7 +589,7 @@ EOA;
 		try {
 			Request::instance()->redirect('/' . Route::get(Route::name(Request::instance()->route))->uri(array('model' => $this->model_name, 'action' => 'index')));
 		} catch (Exception $e) {
-			Claero::exception_handler($e);
+			cl4::exception_handler($e);
 		}
 	} // function
 } // class

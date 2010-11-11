@@ -3,8 +3,8 @@
 return array(
 	// default options for claeroadmin controller
 	'default_list_options' => array(
-		'sort_by_column' => NULL, // claero_orm defaults to primary key
-		'sort_by_order' => NULL, // claero_orm defaults to DESC
+		'sort_by_column' => NULL, // orm defaults to primary key
+		'sort_by_order' => NULL, // orm defaults to DESC
 		'page' => 1,
 		'search' => NULL,
 	),
