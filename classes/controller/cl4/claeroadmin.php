@@ -75,7 +75,7 @@ class Controller_cl4_ClaeroAdmin extends Controller_Base {
 		} //
 
 		// redirect the user to a different model as they one they selected isn't valid (not in array of models)
-		if ( ! isset($model_list[$this->model_name]) && ((cl4::is_dev() && $action != 'create' && $action != 'modelcreate') || ! cl4::is_dev())) {
+		if ( ! isset($model_list[$this->model_name]) && ((cl4::is_dev() && $action != 'create' && $action != 'model_create') || ! cl4::is_dev())) {
 			Message::add('The model you attempted to access (' . $this->model_name . ') doesn\'t exist in the model list defined in the claeroadmin config file.', Message::$debug);
 			Request::instance()->redirect('dbadmin/' . key($model_list) . '/index');
 		}
@@ -148,7 +148,7 @@ class Controller_cl4_ClaeroAdmin extends Controller_Base {
 			if (cl4::is_dev() && $e->getCode() == 3001) {
 				Message::add('The model ' . $this->model_name . ' does not exist.', Message::$debug);
 				if ($this->auto_render && $this->model_name != key($model_list)) {
-					Request::instance()->redirect('dbadmin/' . key($model_list) . '/modelcreate?' . http_build_query(array('table_name' => $this->model_name)));
+					Request::instance()->redirect('dbadmin/' . key($model_list) . '/model_create?' . http_build_query(array('table_name' => $this->model_name)));
 				}
 			} else {
 				// redirect back to the page and display the error
