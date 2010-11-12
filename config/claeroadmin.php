@@ -30,4 +30,12 @@ return array(
 		'demo' => 'Demo',
 		'demosub' => 'Demo Sub',
 	),
+	// an array of actions that shouldn't be used in permission checking (because it saves on a lot of extra permissions)
+	'action_to_permission' => array(
+		'cancel' => 'index',
+		'cancel_search' => 'index',
+		'download' => 'index',
+		'edit_multiple' => 'edit',
+		'create' => 'model_create',
+	),
 );

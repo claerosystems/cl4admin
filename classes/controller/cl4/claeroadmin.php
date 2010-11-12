@@ -44,7 +44,8 @@ class Controller_cl4_ClaeroAdmin extends Controller_Base {
 		$sort_order = cl4::get_param('sort_by_order');
 
 		// check to see the user has permission to access this action
-		$perm_action = $this->get_perm_for_action();
+		$action_to_perm = Kohana::config('claeroadmin.action_to_permission');
+		$perm_action = Arr::get($action_to_perm, $action, $action);
 		if ( ! $this->check_perm($perm_action)) {
 			// we can't use the default functionality of secure_actions because we have 2 possible permissions per action: global and per model
 			if ($action != 'index') {
@@ -107,37 +108,6 @@ class Controller_cl4_ClaeroAdmin extends Controller_Base {
 			$this->template->styles['/css/admin_base.css'] = 'screen';
 		}
 	} // function before
-
-	/**
-	* Returns the permission that should be checked for base on the action
-	* For example, cancel should use index for the permission
-	*
-	* @param mixed $action
-	*/
-	protected function get_perm_for_action($action = NULL) {
-		if ($action === NULL) {
-			$action = Request::instance()->action;
-		}
-
-		// special cases where the permission require is index not the actual action
-		switch ($action) {
-			case 'cancel' :
-			case 'cancel_search' :
-			case 'download' :
-				$perm_action = 'index';
-				break;
-			case 'edit_multiple' :
-				$perm_action = 'edit';
-				break;
-			case 'create' :
-				$perm_action = 'model_create';
-				break;
-			default :
-				$perm_action = $action;
-		} // switch
-
-		return $perm_action;
-	} // function get_perm_for_action
 
 	/**
 	* Stores the current values for page, search and sorting in the session
