@@ -20,15 +20,6 @@ return array(
 	*/
 	'model_list' => array(
 		// model name => display name
-		'useradmin' => 'User',
-		'authlog' => 'Auth Log',
-		'authtype' => 'Auth Type',
-		'group' => 'Group',
-		'grouppermission' => 'Group - Permission',
-		'permission' => 'Permission',
-		'usergroup' => 'User - Group',
-		'demo' => 'Demo',
-		'demosub' => 'Demo Sub',
 	),
 	// an array of actions that shouldn't be used in permission checking (because it saves on a lot of extra permissions)
 	'action_to_permission' => array(
