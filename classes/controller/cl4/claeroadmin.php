@@ -44,18 +44,7 @@ class Controller_cl4_ClaeroAdmin extends Controller_Base {
 		$sort_order = cl4::get_param('sort_by_order');
 
 		// check to see the user has permission to access this action
-		// special cases where the permission require is index not the actual action
-		switch ($action) {
-			case 'cancel' :
-			case 'cancel_search' :
-				$perm_action = 'index';
-				break;
-			case 'edit_multiple' :
-				$perm_action = 'edit';
-				break;
-			default :
-				$perm_action = $action;
-		} // switch
+		$perm_action = $this->get_perm_for_action();
 		if ( ! $this->check_perm($perm_action)) {
 			// we can't use the default functionality of secure_actions because we have 2 possible permissions per action: global and per model
 			if ($action != 'index') {
@@ -118,6 +107,37 @@ class Controller_cl4_ClaeroAdmin extends Controller_Base {
 			$this->template->styles['/css/admin_base.css'] = 'screen';
 		}
 	} // function before
+
+	/**
+	* Returns the permission that should be checked for base on the action
+	* For example, cancel should use index for the permission
+	*
+	* @param mixed $action
+	*/
+	protected function get_perm_for_action($action = NULL) {
+		if ($action === NULL) {
+			$action = Request::instance()->action;
+		}
+
+		// special cases where the permission require is index not the actual action
+		switch ($action) {
+			case 'cancel' :
+			case 'cancel_search' :
+			case 'download' :
+				$perm_action = 'index';
+				break;
+			case 'edit_multiple' :
+				$perm_action = 'edit';
+				break;
+			case 'create' :
+				$perm_action = 'model_create';
+				break;
+			default :
+				$perm_action = $action;
+		} // switch
+
+		return $perm_action;
+	} // function get_perm_for_action
 
 	/**
 	* Stores the current values for page, search and sorting in the session
@@ -234,10 +254,6 @@ class Controller_cl4_ClaeroAdmin extends Controller_Base {
 		// redirect to the index
 		$this->redirect_to_index();
 	} // function
-
-	public function action_add_row() {
-		$this->action_edit();
-	}
 
 	public function action_add() {
 		$this->load_model('add');
@@ -495,7 +511,7 @@ class Controller_cl4_ClaeroAdmin extends Controller_Base {
 	/**
 	* Generates the page with a table list, some JS and a textarea for the generated PHP for a model
 	*/
-	public function action_modelcreate() {
+	public function action_model_create() {
 		try {
 			$this->template->body_html = View::factory('cl4/claeroadmin/model_create', array('db_group' => $this->db_group))
 				->set('table_name', cl4::get_param('table_name'));
@@ -530,7 +546,7 @@ EOA;
 
 	/**
 	* Checks the permission based on action and the claeroadmin controller
-	* The 2 possible permissions are claeroadmin/ * /[action] (no spaces around *) or claeroadmin/[model name]/[action]
+	* The 3 possible permissions are claeroadmin/ * /[action] (no spaces around *) or claeroadmin/[model name]/[action] or claeroadmin/[model name]/ * (no spaces around *)
 	*
 	* @param 	string		$action		The action (permission) to check for; if left as null, the current action will be used
 	* @return 	bool
@@ -542,8 +558,12 @@ EOA;
 
 		$auth = Auth::instance();
 
-		// check if the user has access to all the models or access to this specific model
-		return ($auth->logged_in('claeroadmin/*/' . $action) || $auth->logged_in('claeroadmin/' . $this->model_name . '/' . $action));
+		if ($action != 'model_create') {
+			// check if the user has access to all the models or access to this specific model
+			return ($auth->logged_in('claeroadmin/*/' . $action) || $auth->logged_in('claeroadmin/' . $this->model_name . '/' . $action) || $auth->logged_in('claeroadmin/' . $this->model_name . '/*'));
+		} else {
+			return $auth->logged_in('claeroadmin/model_create');
+		}
 	} // function
 
 	public function display_model_select() {
