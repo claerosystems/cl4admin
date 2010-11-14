@@ -290,7 +290,7 @@ class Controller_cl4_ClaeroAdmin extends Controller_Base {
 					Message::add('There was an error, and the item may not have been saved.', Message::$error);
 				} // if
 			} else {
-				Message::add('The submitted values did not meet the validation requirements: ' . Message::add_validate_errors($validation), Message::$error);
+				Message::add('The submitted values did not meet the validation requirements: ' . Message::add_validate_errors($validation, $this->model_name), Message::$error);
 			}
 		} catch (Exception $e) {
 			cl4::exception_handler($e);
