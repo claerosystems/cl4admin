@@ -233,14 +233,14 @@ class Controller_cl4_ClaeroAdmin extends Controller_Base {
 		}
 
 		try {
-			$this->template->body_html .= '<h2>Adding a New ' . HTML::chars($this->model_display_name) . ' Item</h2>';
+			$this->template->body_html .= '<h2>Adding a New ' . HTML::chars($this->model_display_name) . ' Item</h2>' . EOL;
 
 			// display the edit form
 			$form_options = array(
 				'mode' => 'add',
 			);
 			if ( ! empty($this->id)) {
-				// set the form action because the current url includes the id of the record which will cause a update, not an add
+				// set the form action because the current url includes the id of the record which will cause an update, not an add
 				$form_options['form_action'] = URL::site(Request::current()->uri(array('id' => NULL))) . URL::query();
 			}
 
@@ -261,7 +261,7 @@ class Controller_cl4_ClaeroAdmin extends Controller_Base {
 
 		try {
 			// preload the data if we have an id and this is the edit case
-			$this->template->body_html .= '<h2>Editing a ' . HTML::chars($this->model_display_name) . ' Item</h2>';
+			$this->template->body_html .= '<h2>Editing a ' . HTML::chars($this->model_display_name) . ' Item</h2>' . EOL;
 
 			// display the edit form
 			$this->template->body_html .= $this->target_object->get_form(array(
@@ -310,7 +310,7 @@ class Controller_cl4_ClaeroAdmin extends Controller_Base {
 
 			$this->load_model('view');
 
-			$this->template->body_html .= '<h2>' . HTML::chars($this->model_display_name) . '</h2>';
+			$this->template->body_html .= '<h2>' . HTML::chars($this->model_display_name) . '</h2>' . EOL;
 			$this->template->body_html .= $this->target_object->get_view();
 		} catch (Exception $e) {
 			cl4::exception_handler($e);
@@ -338,7 +338,7 @@ class Controller_cl4_ClaeroAdmin extends Controller_Base {
 				}
 			} // if
 
-			$this->template->body_html .= '<h2>Edit Multiple ' . HTML::chars($this->model_display_name) . ' Records</h2>';
+			$this->template->body_html .= '<h2>Edit Multiple ' . HTML::chars($this->model_display_name) . ' Records</h2>' . EOL;
 			$this->template->body_html .= $orm_multiple->get_edit_multiple($_POST['ids']);
 		} catch (Exception $e) {
 			cl4::exception_handler($e);
@@ -378,7 +378,7 @@ class Controller_cl4_ClaeroAdmin extends Controller_Base {
 				$this->redirect_to_index();
 
 			} else {
-				$this->template->body_html .= '<h2>Delete Item in ' . HTML::chars($this->model_display_name) . '</h2>';
+				$this->template->body_html .= '<h2>Delete Item in ' . HTML::chars($this->model_display_name) . '</h2>' . EOL;
 
 				Message::add(View::factory('cl4/claeroadmin/confirm_delete', array(
 					'object_name' => $this->model_display_name,
@@ -429,7 +429,7 @@ class Controller_cl4_ClaeroAdmin extends Controller_Base {
 	} // function download
 
 	public function action_export() {
-		$this->template->body_html .= '<h2>' . HTML::chars($this->model_display_name) . '</h2>';
+		$this->template->body_html .= '<h2>' . HTML::chars($this->model_display_name) . '</h2>' . EOL;
 		$this->template->body_html .= 'Export has not been implemented yet.';
 	}
 
