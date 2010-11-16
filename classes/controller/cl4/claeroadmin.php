@@ -10,13 +10,13 @@ class Controller_cl4_ClaeroAdmin extends Controller_Base {
 	protected $target_object = NULL; // the actual model object for $model_name
 
 	protected $id = NULL;
+	// stores the values in the session for the current model (by reference)
 	protected $model_session = NULL;
 	protected $page_offset = 1;
 	protected $search = NULL;
 	protected $sort_column = NULL;
 	protected $sort_order = NULL;
 	protected $session_key = NULL;
-	// stores the values in the session for the current model (by reference)
 
 	public $page = 'claeroadmin';
 
