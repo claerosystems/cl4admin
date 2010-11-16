@@ -445,9 +445,10 @@ class Controller_cl4_ClaeroAdmin extends Controller_Base {
 				$this->page_offset = 1;
 				// store the post (the search) in the session and the object
 				$this->search = $this->model_session['search'] = $_POST;
-				// don't need to set the search in the ORM model because it gets set in display_editable_list()
 
-				$this->display_editable_list();
+				// redirect to the index page so the nav will work properly
+				$this->redirect_to_index();
+
 			} else {
 				// display the search form or generate the search results
 				$this->template->body_html .= '<h2>' . HTML::chars($this->model_display_name) . ' Search</h2>' . EOL;
