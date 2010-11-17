@@ -10,7 +10,7 @@ return array(
 	),
 	'session_key' => 'claeroadmin',
 	// default database group to use when a specific model is not loaded, or if the model does not specify a db
-	'db_group' => 'default',
+	'db_group' => NULL,
 	/**
 	* Model list to be used in claeroadmin
 	* An array of model names (keys) and display names (values)
