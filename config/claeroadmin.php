@@ -21,6 +21,7 @@ return array(
 	'model_list' => array(
 		// model name => display name
 	),
+	'default_model' => NULL, // used to determine which model to display by default; if set to null, the default will be the model in model_list
 	// an array of actions that shouldn't be used in permission checking (because it saves on a lot of extra permissions)
 	'action_to_permission' => array(
 		'cancel' => 'index',

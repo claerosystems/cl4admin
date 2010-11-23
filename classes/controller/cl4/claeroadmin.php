@@ -23,7 +23,7 @@ class Controller_cl4_ClaeroAdmin extends Controller_Base {
 	// true means users must be logged in to access this controller
 	public $auth_required = TRUE;
 	// secure actions is false because there is special functionality for claeroadmin (see check_perm())
-	public $secure_actions = FALSE;
+	//public $secure_actions = FALSE; leaving value as default
 
 	public function before() {
 		$action = Request::instance()->action;
@@ -43,7 +43,32 @@ class Controller_cl4_ClaeroAdmin extends Controller_Base {
 		$sort_column = cl4::get_param('sort_by_column');
 		$sort_order = cl4::get_param('sort_by_order');
 
+		// get the model list from the config file
+		$model_list = $this->get_model_list();
+		// get the default model and check if it's set or use the first model in the model list
+		$default_model = $this->get_default_model();
+		if (empty($default_model)) {
+			$default_model = key($model_list);
+		}
+
+		$last_model = isset($this->session[$this->session_key]['last_model']) ? $this->session[$this->session_key]['last_model'] : NULL;
+
+		// check to see if we haven't been passed a model name
+		if (empty($this->model_name)) {
+			// is there a last model stored in the session? then use it
+			if ( ! empty($last_model) && ! empty($last_model)) {
+				$go_to_model = $last_model;
+			// if not, use the first model in the model list
+			} else {
+				$go_to_model = $default_model;
+			}
+
+			Request::instance()->redirect('dbadmin/' . $go_to_model . '/index');
+		} // if
+
 		// check to see the user has permission to access this action
+		// determine what action we should use to determine if they have permission
+		// get config and then check to see if the current action is defined in the array, otherwise use the action
 		$action_to_perm = Kohana::config('claeroadmin.action_to_permission');
 		$perm_action = Arr::get($action_to_perm, $action, $action);
 		if ( ! $this->check_perm($perm_action)) {
@@ -51,33 +76,18 @@ class Controller_cl4_ClaeroAdmin extends Controller_Base {
 			if ($action != 'index') {
 				Message::add('You don\'t have the correct permissions to access this action.', Message::$error);
 				$this->redirect_to_index();
+			} else if ($this->model_name != $default_model) {
+				Message::add('You don\'t have the correct permissions to manage that item.', Message::$error);
+				Request::instance()->redirect('dbadmin/' . $default_model . '/index');
 			} else {
 				Request::instance()->redirect('login/noaccess' . URL::array_to_query(array('referrer' => Request::instance()->uri()), '&'));
 			}
 		} // if
 
-		// get the model list from the config file
-		$model_list = $this->get_model_list();
-
-		$last_model = isset($this->session[$this->session_key]['last_model']) ? $this->session[$this->session_key]['last_model'] : NULL;
-
-		// check to see if we haven't been passed a model name
-		if (empty($this->model_name)) {
-			// is there a last model stored in the session? then use it
-			if ( ! empty($last_model)) {
-				$go_to_model = $last_model;
-			// if not, use the first model in the model list
-			} else {
-				$go_to_model = key($model_list);
-			}
-
-			Request::instance()->redirect('dbadmin/' . $go_to_model . '/index');
-		} //
-
 		// redirect the user to a different model as they one they selected isn't valid (not in array of models)
 		if ( ! isset($model_list[$this->model_name]) && ((cl4::is_dev() && $action != 'create' && $action != 'model_create') || ! cl4::is_dev())) {
 			Message::add('The model you attempted to access (' . $this->model_name . ') doesn\'t exist in the model list defined in the claeroadmin config file.', Message::$debug);
-			Request::instance()->redirect('dbadmin/' . key($model_list) . '/index');
+			Request::instance()->redirect('dbadmin/' . $default_model . '/index');
 		}
 
 		// the first time to the page or first time for this model, so set all the defaults
@@ -105,7 +115,7 @@ class Controller_cl4_ClaeroAdmin extends Controller_Base {
 		$this->session[$this->session_key]['last_model'] = $this->model_name;
 
 		if ($this->auto_render) {
-			$this->template->styles['/css/admin_base.css'] = 'screen';
+			$this->template->styles['css/admin_base.css'] = 'screen';
 		}
 	} // function before
 
@@ -519,19 +529,23 @@ EOA;
 	* Checks the permission based on action and the claeroadmin controller
 	* The 3 possible permissions are claeroadmin/ * /[action] (no spaces around *) or claeroadmin/[model name]/[action] or claeroadmin/[model name]/ * (no spaces around *)
 	*
-	* @param 	string		$action		The action (permission) to check for; if left as null, the current action will be used
+	* @param 	string		$action		The action (permission) to check for; if left as NULL, the current action will be used
+	* @param	string		$model_name	The model name to use in the check; if left as NULL, the current model will be used
 	* @return 	bool
 	*/
-	public function check_perm($action = NULL) {
+	public function check_perm($action = NULL, $model_name = NULL) {
 		if ($action === NULL) {
 			$action = Request::instance()->action;
+		}
+		if ($model_name === NULL) {
+			$model_name = $this->model_name;
 		}
 
 		$auth = Auth::instance();
 
 		if ($action != 'model_create') {
 			// check if the user has access to all the models or access to this specific model
-			return ($auth->logged_in('claeroadmin/*/' . $action) || $auth->logged_in('claeroadmin/' . $this->model_name . '/' . $action) || $auth->logged_in('claeroadmin/' . $this->model_name . '/*'));
+			return ($auth->logged_in('claeroadmin/*/' . $action) || $auth->logged_in('claeroadmin/' . $model_name . '/' . $action) || $auth->logged_in('claeroadmin/' . $model_name . '/*'));
 		} else {
 			return $auth->logged_in('claeroadmin/model_create');
 		}
@@ -566,12 +580,23 @@ EOA;
 		if ($model_list === NULL) $model_list = array();
 
 		// remove any models that have name that are empty (NULL, FALSE, etc)
+		// or that the user doesn't have permission to see the list of records (index)
 		foreach ($model_list as $model => $name) {
-			if (empty($name)) unset($model_list[$model]);
+			if (empty($name) || ! $this->check_perm('index', $model)) unset($model_list[$model]);
 		}
 
 		return $model_list;
 	} // function
+
+	/**
+	* Gets the default model from the config file
+	* Returns the model name
+	*
+	* @return string
+	*/
+	public function get_default_model() {
+		return Kohana::config('claeroadmin.default_model');
+	}
 
 	/**
 	* Redirects the user to the index for the current model based on the current route
