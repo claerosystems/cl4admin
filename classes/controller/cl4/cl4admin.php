@@ -114,10 +114,17 @@ class Controller_cl4_cl4Admin extends Controller_Base {
 
 		$this->session[$this->session_key]['last_model'] = $this->model_name;
 
+		$this->add_admin_css();
+	} // function before
+
+	/**
+	* Adds the CSS for cl4admin
+	*/
+	protected function add_admin_css() {
 		if ($this->auto_render) {
 			$this->template->styles['css/admin_base.css'] = 'screen';
 		}
-	} // function before
+	} // function add_admin_css
 
 	/**
 	* Stores the current values for page, search and sorting in the session
@@ -129,7 +136,7 @@ class Controller_cl4_cl4Admin extends Controller_Base {
 		$this->model_session['search'] = $this->search;
 
 		parent::after();
-	} // function
+	} // function after
 
 	protected function load_model($mode = 'view') {
 		try {
@@ -165,7 +172,7 @@ class Controller_cl4_cl4Admin extends Controller_Base {
 				Request::instance()->redirect('dbadmin/' . key($model_list) . '/index');
 			} // if
 		} // try
-	} // function
+	} // function load_model
 
 	/**
 	* The default action
