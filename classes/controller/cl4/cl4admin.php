@@ -3,7 +3,7 @@
 /**
 * This controller handles the features of add, edit, delete, etc. of database records
 */
-class Controller_cl4_ClaeroAdmin extends Controller_Base {
+class Controller_cl4_cl4Admin extends Controller_Base {
 	protected $db_group = NULL; // the default database config to use, needed for when a specific model is not loaded
 	protected $model_name = NULL; // the name of the model currently being manipulated
 	protected $model_display_name = NULL; // the fulll, friendly object name as specified in the options or the model itself
@@ -18,11 +18,11 @@ class Controller_cl4_ClaeroAdmin extends Controller_Base {
 	protected $sort_order = NULL;
 	protected $session_key = NULL;
 
-	public $page = 'claeroadmin';
+	public $page = 'cl4admin';
 
 	// true means users must be logged in to access this controller
 	public $auth_required = TRUE;
-	// secure actions is false because there is special functionality for claeroadmin (see check_perm())
+	// secure actions is false because there is special functionality for cl4admin (see check_perm())
 	//public $secure_actions = FALSE; leaving value as default
 
 	public function before() {
@@ -31,10 +31,10 @@ class Controller_cl4_ClaeroAdmin extends Controller_Base {
 		parent::before();
 
 		// set up the default database group
-		$this->db_group = Kohana::config('claeroadmin.db_group');
+		$this->db_group = Kohana::config('cl4admin.db_group');
 
 		// assign the name of the default session array
-		$this->session_key = Kohana::config('claeroadmin.session_key');
+		$this->session_key = Kohana::config('cl4admin.session_key');
 
 		// set the information from the route/get/post parameters
 		$this->model_name = Request::instance()->param('model');
@@ -69,7 +69,7 @@ class Controller_cl4_ClaeroAdmin extends Controller_Base {
 		// check to see the user has permission to access this action
 		// determine what action we should use to determine if they have permission
 		// get config and then check to see if the current action is defined in the array, otherwise use the action
-		$action_to_perm = Kohana::config('claeroadmin.action_to_permission');
+		$action_to_perm = Kohana::config('cl4admin.action_to_permission');
 		$perm_action = Arr::get($action_to_perm, $action, $action);
 		if ( ! $this->check_perm($perm_action)) {
 			// we can't use the default functionality of secure_actions because we have 2 possible permissions per action: global and per model
@@ -86,7 +86,7 @@ class Controller_cl4_ClaeroAdmin extends Controller_Base {
 
 		// redirect the user to a different model as they one they selected isn't valid (not in array of models)
 		if ( ! isset($model_list[$this->model_name]) && ((cl4::is_dev() && $action != 'create' && $action != 'model_create') || ! cl4::is_dev())) {
-			Message::add('The model you attempted to access (' . $this->model_name . ') doesn\'t exist in the model list defined in the claeroadmin config file.', Message::$debug);
+			Message::add('The model you attempted to access (' . $this->model_name . ') doesn\'t exist in the model list defined in the cl4admin config file.', Message::$debug);
 			Request::instance()->redirect('dbadmin/' . $default_model . '/index');
 		}
 
@@ -95,7 +95,7 @@ class Controller_cl4_ClaeroAdmin extends Controller_Base {
 		// or we are looking at a new model
 		if ( ! isset($this->session[$this->session_key][$this->model_name])) {
 			// set all the defaults for this model/object
-			$this->session[$this->session_key][$this->model_name] = Kohana::config('claeroadmin.default_list_options');
+			$this->session[$this->session_key][$this->model_name] = Kohana::config('cl4admin.default_list_options');
 		}
 
 		$this->model_session =& $this->session[$this->session_key][$this->model_name];
@@ -390,7 +390,7 @@ class Controller_cl4_ClaeroAdmin extends Controller_Base {
 			} else {
 				$this->template->body_html .= '<h2>Delete Item in ' . HTML::chars($this->model_display_name) . '</h2>' . EOL;
 
-				Message::add(View::factory('cl4/claeroadmin/confirm_delete', array(
+				Message::add(View::factory('cl4/cl4admin/confirm_delete', array(
 					'object_name' => $this->model_display_name,
 				)));
 
@@ -479,7 +479,7 @@ class Controller_cl4_ClaeroAdmin extends Controller_Base {
 	public function action_cancel_search() {
 		try {
 			// reset the search and search in the session
-			$this->model_session = Kohana::config('claeroadmin.default_list_options');
+			$this->model_session = Kohana::config('cl4admin.default_list_options');
 
 			$this->redirect_to_index();
 		} catch (Exception $e) {
@@ -494,7 +494,7 @@ class Controller_cl4_ClaeroAdmin extends Controller_Base {
 	*/
 	public function action_model_create() {
 		try {
-			$this->template->body_html = View::factory('cl4/claeroadmin/model_create', array('db_group' => $this->db_group))
+			$this->template->body_html = View::factory('cl4/cl4admin/model_create', array('db_group' => $this->db_group))
 				->set('table_name', cl4::get_param('table_name'));
 
 			$this->template->on_load_js = <<<EOA
@@ -526,8 +526,8 @@ EOA;
 	} // function
 
 	/**
-	* Checks the permission based on action and the claeroadmin controller
-	* The 3 possible permissions are claeroadmin/ * /[action] (no spaces around *) or claeroadmin/[model name]/[action] or claeroadmin/[model name]/ * (no spaces around *)
+	* Checks the permission based on action and the cl4admin controller
+	* The 3 possible permissions are cl4admin/ * /[action] (no spaces around *) or cl4admin/[model name]/[action] or cl4admin/[model name]/ * (no spaces around *)
 	*
 	* @param 	string		$action		The action (permission) to check for; if left as NULL, the current action will be used
 	* @param	string		$model_name	The model name to use in the check; if left as NULL, the current model will be used
@@ -545,9 +545,9 @@ EOA;
 
 		if ($action != 'model_create') {
 			// check if the user has access to all the models or access to this specific model
-			return ($auth->logged_in('claeroadmin/*/' . $action) || $auth->logged_in('claeroadmin/' . $model_name . '/' . $action) || $auth->logged_in('claeroadmin/' . $model_name . '/*'));
+			return ($auth->logged_in('cl4admin/*/' . $action) || $auth->logged_in('cl4admin/' . $model_name . '/' . $action) || $auth->logged_in('cl4admin/' . $model_name . '/*'));
 		} else {
-			return $auth->logged_in('claeroadmin/model_create');
+			return $auth->logged_in('cl4admin/model_create');
 		}
 	} // function
 
@@ -558,7 +558,7 @@ EOA;
 			asort($model_list);
 			$model_select = Form::select('model', $model_list, $this->model_name, array('id' => 'cl4_model_select'));
 
-			$return_html = View::factory('cl4/claeroadmin/header', array(
+			$return_html = View::factory('cl4/cl4admin/header', array(
 				'model_select' => $model_select,
 				'form_action' => URL::site(Request::current()->uri()) . URL::query(),
 			));
@@ -572,11 +572,11 @@ EOA;
 	} // function
 
 	/**
-	* grab the model list from the claeroadmin config file
+	* grab the model list from the cl4admin config file
 	*
 	*/
 	public function get_model_list() {
-		$model_list = Kohana::config('claeroadmin.model_list');
+		$model_list = Kohana::config('cl4admin.model_list');
 		if ($model_list === NULL) $model_list = array();
 
 		// remove any models that have name that are empty (NULL, FALSE, etc)
@@ -595,7 +595,7 @@ EOA;
 	* @return string
 	*/
 	public function get_default_model() {
-		return Kohana::config('claeroadmin.default_model');
+		return Kohana::config('cl4admin.default_model');
 	}
 
 	/**

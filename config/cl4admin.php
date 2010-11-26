@@ -1,18 +1,18 @@
 <?php defined('SYSPATH') or die('No direct script access.');
 
 return array(
-	// default options for claeroadmin controller
+	// default options for cl4admin controller
 	'default_list_options' => array(
 		'sort_by_column' => NULL, // orm defaults to primary key
 		'sort_by_order' => NULL, // orm defaults to DESC
 		'page' => 1,
 		'search' => NULL,
 	),
-	'session_key' => 'claeroadmin',
+	'session_key' => 'cl4admin',
 	// default database group to use when a specific model is not loaded, or if the model does not specify a db
 	'db_group' => NULL,
 	/**
-	* Model list to be used in claeroadmin
+	* Model list to be used in cl4admin
 	* An array of model names (keys) and display names (values)
 	* Set the display name to an empty value to disable it (NULL, FALSE, etc)
 	* The first one will be used as the default or when there is an attempt to access one that doesn't exist
