@@ -63,6 +63,12 @@ class Controller_cl4_cl4Admin extends Controller_Base {
 				$go_to_model = $default_model;
 			}
 
+			// if there is no new model to go to, redirect them to the no access page
+			if (empty($go_to_model)) {
+				Message::add('There is no model to redirect to.', Message::$debug);
+				Request::instance()->redirect('login/noaccess' . URL::array_to_query(array('referrer' => Request::instance()->uri()), '&'));
+			}
+
 			Request::instance()->redirect('dbadmin/' . $go_to_model . '/index');
 		} // if
 
