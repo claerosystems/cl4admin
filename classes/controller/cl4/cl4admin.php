@@ -439,7 +439,7 @@ class Controller_cl4_cl4Admin extends Controller_Base {
 
 			// check to see if the record has a filename
 			if ( ! empty($filename)) {
-				$this->target_object->stream_file($column_name);
+				$this->target_object->send_file($column_name);
 
 			} else if (empty($filename)) {
 				echo 'There is no file attached to this item.';
