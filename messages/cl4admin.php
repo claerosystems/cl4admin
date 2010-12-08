@@ -1,0 +1,43 @@
+<?php defined('SYSPATH') or die('No direct script access.');
+
+return array(
+    'no_model'                  => 'There is no model to redirect to.',
+    'no_permission_action'      => "You don't have the correct permissions to access this action.",
+    'no_permission_item'        => "You don't have the correct permissions to manage that item.",
+    'model_not_defined'         => "The model you attempted to access (:model_name) doesn't exist in the model list defined in the cl4admin config file.",
+    'using_model'               => "We are using model ':model_name' with mode ':mode' and id ':id'",
+    'model_loaded'              => "The model ':model_name' was loaded.'",
+    'problem_loading_data'      => 'There was a problem loading the data.',
+    'problem_loading_model'     => "There was a problem loading the table or model: :model_name",
+    'model_dne'                 => "The model ':model_name' does not exist.",
+    'problem_preparing'         => 'There was a problem preparing the item list.',
+    'action_cancelled'          => 'The previous action has been cancelled.',
+    'adding_item'               => '<h2>Adding a New :display_name Item</h2>' . EOL,
+    'error_preparing_add'       => 'There was an error while preparing the add form.',
+    'editing_item'              => '<h2>Editing a :display_name Item</h2>' . EOL,
+    'error_preparing_edit'      => 'There was an error while preparing the edit form.',
+    'item_saved'                => 'The item has been saved.',
+    'item_maybe_not_saved'      => 'There was an error, and the item may not have been saved.',
+    'values_not_valid'          => 'The submitted values did not meet the validation requirements: :validate_errors',
+    'problem_saving'            => 'There was a problem saving the item. All the data may not have been saved.',
+    'error_viewing'             => 'There was an error while viewing the item.',
+    'error_saving'              => 'There was an error while saving the records.',
+    'no_id'                     => 'No ID was received so no item could be deleted.',
+    'no_item_deleted'           => 'No item was deleted.',
+    'item_deleted'              => 'The item has been deleted from :display_name.',
+    'record_id_deleted'         => 'Record ID :id was deleted or expired.',
+    'error_deleting'            => 'There was an error while deleting the item.',
+    'item_not_deleted'          => 'The item was <em>not</em> deleted.',
+    'deleting_item'             => '<h2>Delete Item in :display_name</h2>' . EOL,
+    'error_preparing_delete'    => 'There was an error while preparing the delete form.',
+    'no_file'                   => 'There is no file attached to this item.',
+    'problem_downloading'       => 'There was a problem while downloading the file.',
+    'export_not_implemented'    => 'Export has not been implemented yet.',
+    'error_preparing_search'    => 'There was an error while preparing the search form.',
+    'error_clearing_search'     => 'There was an error while clearing the search.',
+    'error_preparing_create'    => 'There was an problem while preparing the model create view.',
+    'error_creating'            => 'There was an error while problem while creating the ORM model.',
+);
+
+Kohana::message('cl4admin', 'error_creating')
+__(Kohana::message('cl4admin', 'deleting_item'), array(':display_name' => HTML::chars($this->model_display_name)))
