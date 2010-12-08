@@ -65,7 +65,7 @@ class Controller_cl4_cl4Admin extends Controller_Base {
 
 			// if there is no new model to go to, redirect them to the no access page
 			if (empty($go_to_model)) {
-				Message::add('There is no model to redirect to.', Message::$debug);
+				Message::add(Kohana::message('cl4admin', 'no_message'), Message::$debug);
 				Request::instance()->redirect('login/noaccess' . URL::array_to_query(array('referrer' => Request::instance()->uri()), '&'));
 			}
 
@@ -80,10 +80,10 @@ class Controller_cl4_cl4Admin extends Controller_Base {
 		if ( ! $this->check_perm($perm_action)) {
 			// we can't use the default functionality of secure_actions because we have 2 possible permissions per action: global and per model
 			if ($action != 'index') {
-				Message::add('You don\'t have the correct permissions to access this action.', Message::$error);
+				Message::add(Kohana::message('cl4admin', 'no_permission_action'), Message::$error);
 				$this->redirect_to_index();
 			} else if ($this->model_name != $default_model) {
-				Message::add('You don\'t have the correct permissions to manage that item.', Message::$error);
+				Message::add(Kohana::message('cl4admin', 'no_permission_item'), Message::$error);
 				Request::instance()->redirect('dbadmin/' . $default_model . '/index');
 			} else {
 				Request::instance()->redirect('login/noaccess' . URL::array_to_query(array('referrer' => Request::instance()->uri()), '&'));
@@ -92,7 +92,7 @@ class Controller_cl4_cl4Admin extends Controller_Base {
 
 		// redirect the user to a different model as they one they selected isn't valid (not in array of models)
 		if ( ! isset($model_list[$this->model_name]) && ((cl4::is_dev() && $action != 'create' && $action != 'model_create') || ! cl4::is_dev())) {
-			Message::add('The model you attempted to access (' . $this->model_name . ') doesn\'t exist in the model list defined in the cl4admin config file.', Message::$debug);
+			Message::add(__(Kohana::message('cl4admin', 'model_not_defined'), array(':model_name' => $this->model_name)), Message::$debug);
 			Request::instance()->redirect('dbadmin/' . $default_model . '/index');
 		}
 
@@ -151,7 +151,7 @@ class Controller_cl4_cl4Admin extends Controller_Base {
 				'db_group' => $this->db_group,
 			);
 
-			Message::add('We are using model `' . $this->model_name . '` with mode `' . $mode . '` and id `' . $this->id . '`.', Message::$debug);
+			Message::add(__(Kohana::message('cl4admin', 'using_model'), array(':model_name' => $this->model_name, ':mode' => $mode, ':id' => $this->id)), Message::$debug);
 
 			$this->target_object = ORM::factory($this->model_name, $this->id, $orm_options);
 			if ($this->auto_render) $this->template->page_title = $this->target_object->_table_name_display . ' Administration' . $this->template->page_title;
@@ -159,17 +159,17 @@ class Controller_cl4_cl4Admin extends Controller_Base {
 			// generate the friendly model name used to display to the user
 			$this->model_display_name = ( ! empty($this->target_object->_table_name_display) ? $this->target_object->_table_name_display : cl4::underscores_to_words($this->model_name));
 
-			Message::add('The model `' . $this->model_name . '` was loaded.', Message::$debug);
+			Message::add(__(Kohana::message('cl4admin', 'model_loaded'), array(':model_name' => $this->model_name)), Message::$debug);
 
 		} catch (Exception $e) {
 			// display the error message
 			cl4::exception_handler($e);
-			Message::add('There was a problem loading the data.', Message::$error);
-			Message::add('There was a problem loading the table or model: ' . $this->model_name, Message::$debug);
+			Message::add(Kohana::message('cl4admin', 'problem_loading_data'), Message::$error);
+			Message::add(__(Kohana::message('cl4admin', 'problem_loading_model'), array(":model_name" => $this->model_name)), Message::$debug);
 
 			// display the help view
 			if (cl4::is_dev() && $e->getCode() == 3001) {
-				Message::add('The model ' . $this->model_name . ' does not exist.', Message::$debug);
+				Message::add(__(Kohana::message('cl4admin', 'model_dne'), array(":model_name" => $this->model_name)), Message::$debug);
 				if ($this->auto_render && $this->model_name != key($model_list)) {
 					Request::instance()->redirect('dbadmin/' . key($model_list) . '/model_create?' . http_build_query(array('table_name' => $this->model_name)));
 				}
@@ -234,7 +234,7 @@ class Controller_cl4_cl4Admin extends Controller_Base {
 			$this->template->body_html .= '</section>' . EOL;
 		} catch (Exception $e) {
 			cl4::exception_handler($e);
-			$this->template->body_html .= 'There was a problem preparing the item list.';
+			$this->template->body_html .= Kohana::message('cl4admin', 'problem_preparing');
 		}
 	} // function
 
@@ -243,7 +243,7 @@ class Controller_cl4_cl4Admin extends Controller_Base {
 	*/
 	function action_cancel() {
 		// add a notice to be displayed
-		Message::add('The previous action has been cancelled.', Message::$notice);
+		Message::add(Kohana::message('cl4admin', 'action_cancelled'), Message::$notice);
 		// redirect to the index
 		$this->redirect_to_index();
 	} // function
@@ -256,7 +256,7 @@ class Controller_cl4_cl4Admin extends Controller_Base {
 		}
 
 		try {
-			$this->template->body_html .= '<h2>Adding a New ' . HTML::chars($this->model_display_name) . ' Item</h2>' . EOL;
+			$this->template->body_html .= __(Kohana::message('cl4admin', 'adding_item'), array(':display_name' => HTML::chars($this->model_display_name)));
 
 			// display the edit form
 			$form_options = array(
@@ -270,7 +270,7 @@ class Controller_cl4_cl4Admin extends Controller_Base {
 			$this->template->body_html .= $this->target_object->get_form($form_options);
 		} catch (Exception $e) {
 			cl4::exception_handler($e);
-			Message::add('There was an error while preparing the add form.', Message::$error);
+			Message::add(Kohana::message('cl4admin', 'error_preparing_add'), Message::$error);
 			if ( ! cl4::is_dev()) $this->redirect_to_index();
 		}
 	} // function action_add
@@ -284,7 +284,7 @@ class Controller_cl4_cl4Admin extends Controller_Base {
 
 		try {
 			// preload the data if we have an id and this is the edit case
-			$this->template->body_html .= '<h2>Editing a ' . HTML::chars($this->model_display_name) . ' Item</h2>' . EOL;
+			$this->template->body_html .= __(Kohana::message('cl4admin', 'editing_item'), array(':display_name' => HTML::chars($this->model_display_name)));
 
 			// display the edit form
 			$this->template->body_html .= $this->target_object->get_form(array(
@@ -292,7 +292,7 @@ class Controller_cl4_cl4Admin extends Controller_Base {
 			));
 		} catch (Exception $e) {
 			cl4::exception_handler($e);
-			Message::add('There was an error while preparing the edit form.', Message::$error);
+			Message::add(Kohana::message('cl4admin', 'error_preparing_edit'), Message::$error);
 			if ( ! cl4::is_dev()) $this->redirect_to_index();
 		} // try
 	} // function action_edit
@@ -307,17 +307,17 @@ class Controller_cl4_cl4Admin extends Controller_Base {
 				$this->target_object->save();
 
 				if ($this->target_object->saved()) {
-					Message::add('The item has been saved.', Message::$notice);
+					Message::add(Kohana::message('cl4admin', 'item_saved'), Message::$notice);
 					$this->redirect_to_index();
 				} else {
-					Message::add('There was an error, and the item may not have been saved.', Message::$error);
+					Message::add(Kohana::message('cl4admin', 'item_maybe_not_saved'), Message::$error);
 				} // if
 			} else {
-				Message::add('The submitted values did not meet the validation requirements: ' . Message::add_validate_errors($this->target_object->validate(), $this->model_name), Message::$error);
+				Message::add(__(Kohana::message('cl4admin', 'values_not_valid'), array(':validate_errors' => Message::add_validate_errors($this->target_object->validate(), $this->model_name))), Message::$error);
 			}
 		} catch (Exception $e) {
 			cl4::exception_handler($e);
-			Message::add('There was a problem saving the item. All the data may not have been saved.', Message::$error);
+			Message::add(Kohana::message('cl4admin', 'problem_saving'), Message::$error);
 			if ( ! cl4::is_dev()) $this->redirect_to_index();
 		} // try
 	} // function save_model
@@ -337,7 +337,7 @@ class Controller_cl4_cl4Admin extends Controller_Base {
 			$this->template->body_html .= $this->target_object->get_view();
 		} catch (Exception $e) {
 			cl4::exception_handler($e);
-			Message::add('There was an error while viewing the item.', Message::$error);
+			Message::add(Kohana::message('cl4admin', 'error_viewing'), Message::$error);
 			if ( ! cl4::is_dev()) $this->redirect_to_index();
 		}
 	} // function
@@ -357,7 +357,7 @@ class Controller_cl4_cl4Admin extends Controller_Base {
 					$this->redirect_to_index();
 				} catch (Exception $e) {
 					cl4::exception_handler($e);
-					Message::add('There was an error while saving the records.', Message::$error);
+					Message::add(Kohana::message('cl4admin', 'error_saving'), Message::$error);
 				}
 			} // if
 
@@ -365,7 +365,7 @@ class Controller_cl4_cl4Admin extends Controller_Base {
 			$this->template->body_html .= $orm_multiple->get_edit_multiple($_POST['ids']);
 		} catch (Exception $e) {
 			cl4::exception_handler($e);
-			Message::add('There was an error while preparing the edit form.', Message::$error);
+			Message::add(Kohana::message('cl4admin', 'error_preparing_edit'), Message::$error);
 			if ( ! cl4::is_dev()) $this->redirect_to_index();
 		}
 	} // function
@@ -373,7 +373,7 @@ class Controller_cl4_cl4Admin extends Controller_Base {
 	public function action_delete() {
 		try {
 			if ( ! ($this->id > 0)) {
-				Message::add('No ID was received so no item could be deleted.', Message::$error);
+				Message::add(Kohana::message('cl4admin', 'no_id'), Message::$error);
 				$this->redirect_to_index();
 			} // if
 
@@ -384,24 +384,24 @@ class Controller_cl4_cl4Admin extends Controller_Base {
 				if (strtolower($_POST['cl4_delete_confirm']) == 'yes') {
 					try {
 						if ($this->target_object->delete() == 0) {
-							Message::add('No item was deleted.', Message::$error);
+							Message::add(Kohana::message('cl4admin', 'no_item_deleted'), Message::$error);
 						} else {
-							Message::add('The item has been deleted from ' . html::chars($this->model_display_name) . '.', Message::$notice);
-							Message::add('Record ID ' . $this->id . ' was deleted or expired.', Message::$debug);
+							Message::add(__(Kohana::message('cl4admin', 'item_deleted'), array(':display_name' => html::chars($this->model_display_name))), Message::$notice);
+							Message::add(__(Kohana::message('cl4admin', 'record_id_deleted'), array(':id' => $this->id)), Message::$debug);
 						} // if
 					} catch (Exception $e) {
 						cl4::exception_handler($e);
-						Message::add('There was an error while deleting the item.', Message::$error);
+						Message::add(Kohana::message('cl4admin', 'error_deleting'), Message::$error);
 						if ( ! cl4::is_dev()) $this->redirect_to_index();
 					}
 				} else {
-					Message::add('The item was <em>not</em> deleted.', Message::$notice);
+					Message::add(Kohana::message('cl4admin', 'item_not_deleted'), Message::$notice);
 				}
 
 				$this->redirect_to_index();
 
 			} else {
-				$this->template->body_html .= '<h2>Delete Item in ' . HTML::chars($this->model_display_name) . '</h2>' . EOL;
+				$this->template->body_html .= __(Kohana::message('cl4admin', 'deleting_item'), array(':display_name' => HTML::chars($this->model_display_name)));
 
 				Message::add(View::factory('cl4/cl4admin/confirm_delete', array(
 					'object_name' => $this->model_display_name,
@@ -411,7 +411,7 @@ class Controller_cl4_cl4Admin extends Controller_Base {
 			}
 		} catch (Exception $e) {
 			cl4::exception_handler($e);
-			Message::add('There was an error while preparing the delete form.', Message::$error);
+			Message::add(Kohana::message('cl4admin', 'error_preparing_delete'), Message::$error);
 			if ( ! cl4::is_dev()) $this->redirect_to_index();
 		}
 	} // function action_delete
@@ -442,18 +442,18 @@ class Controller_cl4_cl4Admin extends Controller_Base {
 				$this->target_object->send_file($column_name);
 
 			} else if (empty($filename)) {
-				echo 'There is no file attached to this item.';
+				echo Kohana::message('cl4admin', 'no_file');
 				throw new Kohana_Exception('There is no file associated with the record');
 			} // if
 		} catch (Exception $e) {
 			cl4::exception_handler($e);
-			echo 'There was a problem while downloading the file.';
+			echo Kohana::message('cl4admin', 'problem_downloading');
 		}
 	} // function download
 
 	public function action_export() {
 		$this->template->body_html .= '<h2>' . HTML::chars($this->model_display_name) . '</h2>' . EOL;
-		$this->template->body_html .= 'Export has not been implemented yet.';
+		$this->template->body_html .= Kohana::message('cl4admin', 'export_not_implemented');
 	}
 
 	/**
@@ -481,7 +481,7 @@ class Controller_cl4_cl4Admin extends Controller_Base {
 			}
 		} catch (Exception $e) {
 			cl4::exception_handler($e);
-			Message::add('There was an error while preparing the search form.', Message::$error);
+			Message::add(Kohana::message('cl4admin', 'error_preparing_search'), Message::$error);
 			if ( ! cl4::is_dev()) $this->redirect_to_index();
 		}
 	} // function
@@ -497,7 +497,7 @@ class Controller_cl4_cl4Admin extends Controller_Base {
 			$this->redirect_to_index();
 		} catch (Exception $e) {
 			cl4::exception_handler($e);
-			Message::add('There was an error while problem while clearing the search.', Message::$error);
+			Message::add(Kohana::message('cl4admin', 'error_clearing_search'), Message::$error);
 			if ( ! cl4::is_dev()) $this->redirect_to_index();
 		}
 	} // function
@@ -519,7 +519,7 @@ $('#m_table_name').change(function() {
 EOA;
 		} catch (Exception $e) {
 			cl4::exception_handler($e);
-			Message::add('There was an problem while preparing the model create view.', Message::$error);
+			Message::add(Kohana::message('cl4admin', 'error_preparing_create'), Message::$error);
 		}
 	} // function
 
@@ -534,7 +534,7 @@ EOA;
 			$this->request->response = ModelCreate::create_model($this->model_name);
 		} catch (Exception $e) {
 			cl4::exception_handler($e);
-			echo 'There was an error while problem while creating the PHP model.';
+			echo Kohana::message('cl4admin', 'error_creating');
 		}
 	} // function
 
