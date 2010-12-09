@@ -38,6 +38,3 @@ return array(
     'error_preparing_create'    => 'There was an problem while preparing the model create view.',
     'error_creating'            => 'There was an error while problem while creating the ORM model.',
 );
-
-Kohana::message('cl4admin', 'error_creating')
-__(Kohana::message('cl4admin', 'deleting_item'), array(':display_name' => HTML::chars($this->model_display_name)))
