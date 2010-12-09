@@ -8,7 +8,7 @@ return array(
 		'page' => 1,
 		'search' => NULL,
 	),
-	'session_key' => 'cl4admin',
+	'session_key' => 'cl4_admin',
 	// default database group to use when a specific model is not loaded, or if the model does not specify a db
 	'db_group' => NULL,
 	/**
