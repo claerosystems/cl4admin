@@ -394,10 +394,7 @@ class Controller_cl4_cl4Admin extends Controller_Base {
 	public function action_edit_multiple() {
 		try {
 			// set up the admin options
-			$options = array(
-				'mode' => 'edit',
-			);
-			$orm_multiple = MultiORM::factory($this->model_name, $options);
+			$orm_multiple = MultiORM::factory($this->model_name, array('mode' => 'edit'));
 
 			if (empty($_POST['ids'])) {
 				try {
