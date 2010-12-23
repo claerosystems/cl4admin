@@ -198,7 +198,9 @@ class Controller_cl4_cl4Admin extends Controller_Base {
 	}
 
 	/**
-	* display the editable list of records for the selected object
+	* Display the editable list of records for the selected object.
+	*
+	* @param  array  $override_options  A list of options that can be set to override default behaviours.
 	*/
 	public function display_editable_list($override_options = array()) {
 		// display the object / table select
