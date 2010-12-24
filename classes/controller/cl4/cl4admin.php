@@ -401,6 +401,8 @@ class Controller_cl4_cl4Admin extends Controller_Base {
 				try {
 					// Try to save the records
 					$orm_multiple->save_multiple();
+					Message::message('cl4admin', 'multiple_saved', array(':records_saved' => $orm_multiple->records_saved()), Message::$notice);
+
 					$this->redirect_to_index();
 				} catch (Exception $e) {
 					cl4::exception_handler($e);
@@ -436,6 +438,8 @@ class Controller_cl4_cl4Admin extends Controller_Base {
 				try {
 					// try to save the records
 					$orm_multiple->save_multiple();
+					Message::message('cl4admin', 'multiple_saved', array(':records_saved' => $orm_multiple->records_saved()), Message::$notice);
+
 					$this->redirect_to_index();
 				} catch (Exception $e) {
 					cl4::exception_handler($e);

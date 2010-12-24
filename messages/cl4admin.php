@@ -18,6 +18,7 @@ return array(
 	'error_preparing_edit'      => 'There was an error while preparing the edit form.',
 	'item_saved'                => 'The item has been saved.',
 	'item_may_have_not_saved'   => 'There was an error, and the item may not have been saved.',
+	'multiple_saved'            => ':records_saved item(s) have been saved.',
 	'multiple_edit_item'        => 'Edit Multiple :display_name Items',
 	'multiple_add_item'         => 'Add Multiple :display_name Items',
 	'values_not_valid'          => 'The submitted values did not meet the validation requirements: :validate_errors',
