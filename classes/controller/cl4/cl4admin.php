@@ -389,6 +389,9 @@ class Controller_cl4_cl4Admin extends Controller_Base {
 		}
 	} // function
 
+	/**
+	* Add and save/insert multiple records
+	*/
 	public function action_add_multiple() {
 		try {
 			// Create a new MuliORM for this model
