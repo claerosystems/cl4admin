@@ -273,6 +273,7 @@ class Controller_cl4_cl4Admin extends Controller_Base {
 		if ($display_name === NULL) {
 			$display_name = $this->model_display_name;
 		}
+
 		return __(Kohana::message('cl4admin', $message_path), array(':display_name' => HTML::chars($display_name)));
 	} // function get_page_title_message
 
@@ -317,7 +318,7 @@ class Controller_cl4_cl4Admin extends Controller_Base {
 			}
 
 			// Set view details
-			$view_title = $this->get_page_title_message('multiple_add_item');
+			$view_title = $this->get_page_title_message('multiple_add_item', $orm_multiple->_table_name_display);
 			$view_content = $orm_multiple->get_add_multiple($count);
 
 			// Add view to template
@@ -445,7 +446,7 @@ class Controller_cl4_cl4Admin extends Controller_Base {
 				}
 			} // if
 
-			$view_title = $this->get_page_title_message('multiple_edit_item');
+			$view_title = $this->get_page_title_message('multiple_edit_item', $orm_multiple->_table_name_display);
 			$view_content = $orm_multiple->get_edit_multiple($_POST['ids']);
 			$this->add_admin_view($view_title, $view_content);
 		} catch (Exception $e) {
