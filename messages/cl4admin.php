@@ -22,6 +22,7 @@ return array(
 	'multiple_edit_item'        => 'Edit Multiple :display_name Items',
 	'multiple_add_item'         => 'Add Multiple :display_name Items',
 	'values_not_valid'          => 'The submitted values did not meet the validation requirements: :validate_errors',
+	'values_not_valid_multiple' => 'The submitted values for Item #:record_number did not meet the validation requirements: :validate_errors',
 	'problem_saving'            => 'There was a problem saving the item. All the data may not have been saved.',
 	'error_viewing'             => 'There was an error while viewing the item.',
 	'error_saving'              => 'There was an error while saving the records.',
