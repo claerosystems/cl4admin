@@ -291,67 +291,31 @@ class Controller_cl4_cl4Admin extends Controller_Base {
 	* Display an add form or add (save) a new record
 	*/
 	public function action_add() {
-		// If we're adding multple records
-		if (Request::instance()->param('column_name') == 'multiple') {
-			// The count for the number of records were adding is stored in the ID field
-			$count = $this->id;
+		$this->load_model('add');
 
-			try {
-				// Create a new MuliORM for this model
-				$orm_multiple = MultiORM::factory($this->model_name, array('mode' => 'add'));
-			} catch (Exception $e) {
-				cl4::exception_handler($e);
-				Message::message('cl4admin', 'error_preparing_add', NULL, Message::$error);
-				if ( ! cl4::is_dev()) $this->redirect_to_index();
+		if ( ! empty($_POST)) {
+			$this->save_model();
+		}
+
+		try {
+			$view_title = $this->get_page_title_message('adding_item');
+
+			// display the edit form
+			$form_options = array(
+				'mode' => 'add',
+			);
+			if ( ! empty($this->id)) {
+				// set the form action because the current url includes the id of the record which will cause an update, not an add
+				$form_options['form_action'] = URL::site(Request::current()->uri(array('id' => NULL))) . URL::query();
 			}
 
-			// If form was submitted
-			if ( ! empty($_POST)) {
-				try {
-					// Try to save the records
-					$orm_multiple->save_edit_multiple();
-					$this->redirect_to_index();
-				} catch (Exception $e) {
-					cl4::exception_handler($e);
-					Message::message('cl4admin', 'error_saving', NULL, Message::$error);
-				}
-			}
+			$view_content = $this->target_object->get_form($form_options);
 
-			// Set view details
-			$view_title = $this->get_page_title_message('multiple_add_item', $orm_multiple->_table_name_display);
-			$view_content = $orm_multiple->get_add_multiple($count);
-
-			// Add view to template
 			$this->add_admin_view($view_title, $view_content);
-
-		// If we're just adding a single record
-		} else {
-			$this->load_model('add');
-
-			if ( ! empty($_POST)) {
-				$this->save_model();
-			}
-
-			try {
-				$view_title = $this->get_page_title_message('adding_item');
-
-				// display the edit form
-				$form_options = array(
-					'mode' => 'add',
-				);
-				if ( ! empty($this->id)) {
-					// set the form action because the current url includes the id of the record which will cause an update, not an add
-					$form_options['form_action'] = URL::site(Request::current()->uri(array('id' => NULL))) . URL::query();
-				}
-
-				$view_content = $this->target_object->get_form($form_options);
-
-				$this->add_admin_view($view_title, $view_content);
-			} catch (Exception $e) {
-				cl4::exception_handler($e);
-				Message::message('cl4admin', 'error_preparing_add', NULL, Message::$error);
-				if ( ! cl4::is_dev()) $this->redirect_to_index();
-			}
+		} catch (Exception $e) {
+			cl4::exception_handler($e);
+			Message::message('cl4admin', 'error_preparing_add', NULL, Message::$error);
+			if ( ! cl4::is_dev()) $this->redirect_to_index();
 		}
 	} // function action_add
 
@@ -427,6 +391,39 @@ class Controller_cl4_cl4Admin extends Controller_Base {
 		}
 	} // function
 
+	public function action_add_multiple() {
+		try {
+			// Create a new MuliORM for this model
+			$orm_multiple = MultiORM::factory($this->model_name, array('mode' => 'add'));
+
+			// If form was submitted
+			if ( ! empty($_POST)) {
+				try {
+					// Try to save the records
+					$orm_multiple->save_edit_multiple();
+					$this->redirect_to_index();
+				} catch (Exception $e) {
+					cl4::exception_handler($e);
+					Message::message('cl4admin', 'error_saving', NULL, Message::$error);
+				}
+			} // if
+
+			// Set view details
+			$view_title = $this->get_page_title_message('multiple_add_item', $orm_multiple->_table_name_display);
+
+			// The count for the number of records were adding is stored in the ID field
+			$count = Request::instance()->param('id');
+			$view_content = $orm_multiple->get_add_multiple($count);
+
+			// Add view to template
+			$this->add_admin_view($view_title, $view_content);
+		} catch (Exception $e) {
+			cl4::exception_handler($e);
+			Message::message('cl4admin', 'error_preparing_add', NULL, Message::$error);
+			if ( ! cl4::is_dev()) $this->redirect_to_index();
+		}
+	} // function action_add_multiple
+
 	/**
 	* Edit and save/update multiple records
 	*/
@@ -454,7 +451,7 @@ class Controller_cl4_cl4Admin extends Controller_Base {
 			Message::message('cl4admin', 'error_preparing_edit', NULL, Message::$error);
 			if ( ! cl4::is_dev()) $this->redirect_to_index();
 		}
-	} // function
+	} // function action_edit_multiple
 
 	/**
 	* Delete a record with a confirm first

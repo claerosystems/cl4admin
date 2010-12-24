@@ -27,6 +27,7 @@ return array(
 		'cancel' => 'index',
 		'cancel_search' => 'index',
 		'download' => 'index',
+		'add_multiple' => 'add',
 		'edit_multiple' => 'edit',
 		'create' => 'model_create',
 	),
