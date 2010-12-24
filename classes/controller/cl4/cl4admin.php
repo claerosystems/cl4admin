@@ -400,7 +400,7 @@ class Controller_cl4_cl4Admin extends Controller_Base {
 			if ( ! empty($_POST)) {
 				try {
 					// Try to save the records
-					$orm_multiple->save_edit_multiple();
+					$orm_multiple->save_multiple();
 					$this->redirect_to_index();
 				} catch (Exception $e) {
 					cl4::exception_handler($e);
@@ -435,7 +435,7 @@ class Controller_cl4_cl4Admin extends Controller_Base {
 			if (empty($_POST['ids'])) {
 				try {
 					// try to save the records
-					$orm_multiple->save_edit_multiple();
+					$orm_multiple->save_multiple();
 					$this->redirect_to_index();
 				} catch (Exception $e) {
 					cl4::exception_handler($e);
