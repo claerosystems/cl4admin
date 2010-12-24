@@ -352,9 +352,7 @@ class Controller_cl4_cl4Admin extends Controller_Base {
 
 			if ($validation === TRUE) {
 				// save the record
-				$this->target_object->save();
-
-				if ($this->target_object->saved()) {
+				if ($this->target_object->save()->saved()) {
 					Message::message('cl4admin', 'item_saved', NULL, Message::$notice);
 					$this->redirect_to_index();
 				} else {
