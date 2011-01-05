@@ -60,16 +60,15 @@ class Controller_cl4_cl4Admin extends Controller_Base {
 		// check to see if we haven't been passed a model name
 		if (empty($this->model_name)) {
 			// is there a last model stored in the session? then use it
-			if ( ! empty($last_model) && ! empty($last_model)) {
+			if ( ! empty($last_model)) {
 				$go_to_model = $last_model;
-			// if not, use the first model in the model list
+			// if not, go the the default model if it's set
 			} else {
 				$go_to_model = $default_model;
 			}
 
 			// if there is no new model to go to, redirect them to the no access page
 			if (empty($go_to_model)) {
-				Message::message('cl4admin', 'no_message', NULL, Message::$debug);
 				Request::instance()->redirect('login/noaccess' . URL::array_to_query(array('referrer' => Request::instance()->uri()), '&'));
 			}
 
@@ -86,7 +85,7 @@ class Controller_cl4_cl4Admin extends Controller_Base {
 			if ($action != 'index') {
 				Message::message('cl4admin', 'no_permission_action', NULL, Message::$error);
 				$this->redirect_to_index();
-			} else if ($this->model_name != $default_model) {
+			} else if ($this->model_name != $default_model && ! empty($default_model)) {
 				Message::message('cl4admin', 'no_permission_item', NULL, Message::$error);
 				Request::instance()->redirect('dbadmin/' . $default_model . '/index');
 			} else {
