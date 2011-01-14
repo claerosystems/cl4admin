@@ -723,12 +723,19 @@ class Controller_cl4_cl4Admin extends Controller_Base {
 	*/
 	public function action_model_create() {
 		try {
+			$db_group = cl4::get_param('db_group', Database::$default);
+
 			$this->template->body_html = View::factory('cl4/cl4admin/model_create')
 				->set('table_name', cl4::get_param('table_name'))
+				->set('db_group', $db_group)
+				->bind('db_list', $db_list)
 				->bind('table_list', $table_list);
 
-			$table_list = Database::instance($this->db_group)->list_tables();
+			$table_list = Database::instance($db_group)->list_tables();
 			$table_list = array_combine($table_list, $table_list);
+
+			$db_list = array_keys((array) Kohana::config('database'));
+			$db_list = array_combine($db_list, $db_list);
 
 			$this->template->scripts['model_create'] = 'cl4/js/model_create.js';
 		} catch (Exception $e) {
@@ -745,8 +752,13 @@ class Controller_cl4_cl4Admin extends Controller_Base {
 		try {
 			// we don't want the template controller automatically adding all the html
 			$this->auto_render = FALSE;
+
+			$db_group = cl4::get_param('db_group', Database::$default);
+
 			// generate a sample model file for the given table based on the database definition
-			$this->request->response = ModelCreate::create_model($this->model_name);
+			$this->request->response = ModelCreate::create_model($this->model_name, array(
+				'db_group' => $db_group,
+			));
 		} catch (Exception $e) {
 			cl4::exception_handler($e);
 			echo Kohana::message('cl4admin', 'error_creating');

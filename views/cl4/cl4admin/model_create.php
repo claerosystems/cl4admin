@@ -4,7 +4,8 @@
 Select a table to generate the cl4/orm model code:
 <?php
 
-echo Form::select('m_table_name', $table_list, $table_name, array('id' => 'm_table_name')) . '&nbsp;';
+echo Form::select('db_group', $db_list, $db_group, array('id' => 'db_group')) . '&nbsp;';
+echo Form::select('table_name', $table_list, $table_name, array('id' => 'table_name')) . '&nbsp;';
 echo Form::input('create', 'Create', array('type' => 'button', 'id' => 'create_model'));
 echo Form::textarea('', '', array(
 	'id' => 'model_code_container',
