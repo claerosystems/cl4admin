@@ -18,4 +18,4 @@ with respect to displaying sensitive data.</p>
 Select a table to generate the cl4/orm model code:
 <?php echo Form::select('m_table_name', $table_list, $table_name, array('id' => 'm_table_name')); ?>&nbsp;
 <?php echo Form::input('create', 'Create', array('type' => 'button', 'onclick' => '$(\'#m_table_name\').change();')); ?>
-<textarea id="model_code_container" style="width: 100%; height: 500px; margin: 15px 0;"></textarea>
+<textarea id="model_code_container" style="width:100%; height:800px; margin:15px 0;"></textarea>
