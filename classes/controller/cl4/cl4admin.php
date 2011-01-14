@@ -723,17 +723,14 @@ class Controller_cl4_cl4Admin extends Controller_Base {
 	*/
 	public function action_model_create() {
 		try {
-			$this->template->body_html = View::factory('cl4/cl4admin/model_create', array('db_group' => $this->db_group))
-				->set('table_name', cl4::get_param('table_name'));
+			$this->template->body_html = View::factory('cl4/cl4admin/model_create')
+				->set('table_name', cl4::get_param('table_name'))
+				->bind('table_list', $table_list);
 
-			$on_load_js = <<<EOA
-$('#m_table_name').change(function() {
-	$.get('/dbadmin/' + $(this).val() + '/create', function(data) {
-		$('#model_code_container').val(data);
-	});
-});
-EOA;
-			$this->add_on_load_js($on_load_js);
+			$table_list = Database::instance($this->db_group)->list_tables();
+			$table_list = array_combine($table_list, $table_list);
+
+			$this->template->scripts['model_create'] = 'cl4/js/model_create.js';
 		} catch (Exception $e) {
 			cl4::exception_handler($e);
 			Message::message('cl4admin', 'error_preparing_create', NULL, Message::$error);
