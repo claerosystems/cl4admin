@@ -131,7 +131,8 @@ class Controller_cl4_cl4Admin extends Controller_Base {
 	*/
 	protected function add_admin_css() {
 		if ($this->auto_render) {
-			$this->template->styles['css/admin_base.css'] = 'screen';
+			$this->template->styles['css/admin.css'] = 'screen';
+			$this->template->styles['css/dbadmin.css'] = 'screen';
 		}
 	} // function add_admin_css
 
