@@ -4,19 +4,22 @@
 * This controller handles the features of add, edit, delete, etc. of database records
 */
 class Controller_cl4_cl4Admin extends Controller_Base {
-	protected $db_group = NULL; // the default database config to use, needed for when a specific model is not loaded
-	protected $model_name = NULL; // the name of the model currently being manipulated
-	protected $model_display_name = NULL; // the fulll, friendly object name as specified in the options or the model itself
-	protected $target_object = NULL; // the actual model object for $model_name
+	protected $db_group; // the default database config to use, needed for when a specific model is not loaded
+	protected $model_name; // the name of the model currently being manipulated
+	protected $model_display_name; // the fulll, friendly object name as specified in the options or the model itself
+	/**
+	* @var  ORM  The model we are working with
+	*/
+	protected $target_object; // the actual model object for $model_name
 
-	protected $id = NULL;
+	protected $id;
 	// stores the values in the session for the current model (by reference)
-	protected $model_session = NULL;
+	protected $model_session;
 	protected $page_offset = 1;
-	protected $search = NULL;
-	protected $sort_column = NULL;
-	protected $sort_order = NULL;
-	protected $session_key = NULL;
+	protected $search;
+	protected $sort_column;
+	protected $sort_order;
+	protected $session_key;
 
 	public $page = 'cl4admin';
 
@@ -30,7 +33,7 @@ class Controller_cl4_cl4Admin extends Controller_Base {
 	* Calls parent::before()
 	*/
 	public function before() {
-		$action = Request::instance()->action;
+		$action = Request::current()->action();
 
 		parent::before();
 
@@ -41,8 +44,8 @@ class Controller_cl4_cl4Admin extends Controller_Base {
 		$this->session_key = Kohana::config('cl4admin.session_key');
 
 		// set the information from the route/get/post parameters
-		$this->model_name = Request::instance()->param('model');
-		$this->id = Request::instance()->param('id');
+		$this->model_name = Request::current()->param('model');
+		$this->id = Request::current()->param('id');
 		$page_offset = cl4::get_param('page');
 		$sort_column = cl4::get_param('sort_by_column');
 		$sort_order = cl4::get_param('sort_by_order');
@@ -69,10 +72,10 @@ class Controller_cl4_cl4Admin extends Controller_Base {
 
 			// if there is no new model to go to, redirect them to the no access page
 			if (empty($go_to_model)) {
-				Request::instance()->redirect('login/noaccess' . URL::array_to_query(array('referrer' => Request::instance()->uri()), '&'));
+				Request::current()->redirect('login/noaccess' . URL::array_to_query(array('referrer' => Request::current()->uri()), '&'));
 			}
 
-			Request::instance()->redirect('dbadmin/' . $go_to_model . '/index');
+			Request::current()->redirect('dbadmin/' . $go_to_model . '/index');
 		} // if
 
 		// check to see the user has permission to access this action
@@ -87,16 +90,16 @@ class Controller_cl4_cl4Admin extends Controller_Base {
 				$this->redirect_to_index();
 			} else if ($this->model_name != $default_model && ! empty($default_model)) {
 				Message::message('cl4admin', 'no_permission_item', NULL, Message::$error);
-				Request::instance()->redirect('dbadmin/' . $default_model . '/index');
+				Request::current()->redirect('dbadmin/' . $default_model . '/index');
 			} else {
-				Request::instance()->redirect('login/noaccess' . URL::array_to_query(array('referrer' => Request::instance()->uri()), '&'));
+				Request::current()->redirect('login/noaccess' . URL::array_to_query(array('referrer' => Request::current()->uri()), '&'));
 			}
 		} // if
 
 		// redirect the user to a different model as they one they selected isn't valid (not in array of models)
 		if ( ! isset($model_list[$this->model_name]) && ((cl4::is_dev() && $action != 'create' && $action != 'model_create') || ! cl4::is_dev())) {
 			Message::message('cl4admin', 'model_not_defined', array(':model_name' => $this->model_name), Message::$debug);
-			Request::instance()->redirect('dbadmin/' . $default_model . '/index');
+			Request::current()->redirect('dbadmin/' . $default_model . '/index');
 		}
 
 		// the first time to the page or first time for this model, so set all the defaults
@@ -180,11 +183,11 @@ class Controller_cl4_cl4Admin extends Controller_Base {
 			if (cl4::is_dev() && $e->getCode() == 3001) {
 				Message::message('cl4admin', 'model_dne', array(':model_name' => $this->model_name), Message::$debug);
 				if ($this->auto_render && $this->model_name != key($model_list)) {
-					Request::instance()->redirect('dbadmin/' . key($model_list) . '/model_create?' . http_build_query(array('table_name' => $this->model_name)));
+					Request::current()->redirect('dbadmin/' . key($model_list) . '/model_create?' . http_build_query(array('table_name' => $this->model_name)));
 				}
 			} else {
 				// redirect back to the page and display the error
-				Request::instance()->redirect('dbadmin/' . key($model_list) . '/index');
+				Request::current()->redirect('dbadmin/' . key($model_list) . '/index');
 			} // if
 		} // try
 	} // function load_model
@@ -347,22 +350,19 @@ class Controller_cl4_cl4Admin extends Controller_Base {
 	*/
 	public function save_model() {
 		try {
-			// validate the post data against the model
-			$validation = $this->target_object->save_values()->check();
-
-			if ($validation === TRUE) {
-				// save the record
-				if ($this->target_object->save()->saved()) {
-					Message::message('cl4admin', 'item_saved', NULL, Message::$notice);
-					$this->redirect_to_index();
-				} else {
-					Message::message('cl4admin', 'item_may_have_not_saved', NULL, Message::$error);
-				} // if
+			// save the record
+			$custom_save_method = 'save_model_' . $this->model_name;
+			if (method_exists($this, $custom_save_method)) {
+				$this->$custom_save_method();
 			} else {
-				Message::message('cl4admin', 'values_not_valid', array(
-					':validate_errors' => Message::add_validate_errors($this->target_object->validate(), $this->model_name)
-				), Message::$error);
+				$this->target_object->save_values()->save();
 			}
+			Message::message('cl4admin', 'item_saved', NULL, Message::$notice);
+			$this->redirect_to_index();
+		} catch (ORM_Validation_Exception $e) {
+			Message::message('cl4admin', 'values_not_valid', array(
+				':validate_errors' => Message::add_validate_errors($this->target_object->validation(), $this->model_name)
+			), Message::$error);
 		} catch (Exception $e) {
 			cl4::exception_handler($e);
 			Message::message('cl4admin', 'problem_saving', NULL, Message::$error);
@@ -407,12 +407,12 @@ class Controller_cl4_cl4Admin extends Controller_Base {
 						Message::message('cl4admin', 'multiple_saved', array(':records_saved' => $orm_multiple->records_saved()), Message::$notice);
 						$this->redirect_to_index();
 					} else {
-						$validation_objects = $orm_multiple->validate_objects();
+						$validation_exceptions = $orm_multiple->validation_exceptions();
 						$error_messages = array();
-						foreach ($validation_objects as $num => $validate) {
+						foreach ($validation_exceptions as $num => $exception) {
 							Message::message('cl4admin', 'values_not_valid_multiple', array(
 								':record_number' => ($num + 1),
-								':validate_errors' => Message::add_validate_errors($validate, $this->model_name)
+								':validate_errors' => Message::add_validate_errors($exception)
 							), Message::$error);
 						}
 					} // if
@@ -426,7 +426,7 @@ class Controller_cl4_cl4Admin extends Controller_Base {
 			$view_title = $this->get_page_title_message('multiple_add_item', $orm_multiple->_table_name_display);
 
 			// The count for the number of records were adding is stored in the ID field
-			$count = Request::instance()->param('id');
+			$count = Request::current()->param('id');
 			$view_content = $orm_multiple->get_add_multiple($count);
 
 			// Add view to template
@@ -457,12 +457,11 @@ class Controller_cl4_cl4Admin extends Controller_Base {
 						Message::message('cl4admin', 'multiple_saved', array(':records_saved' => $orm_multiple->records_saved()), Message::$notice);
 						$this->redirect_to_index();
 					} else {
-						$validation_objects = $orm_multiple->validate_objects();
-						$error_messages = array();
-						foreach ($validation_objects as $num => $validate) {
+						$validation_exceptions = $orm_multiple->validation_exceptions();
+						foreach ($validation_exceptions as $num => $exception) {
 							Message::message('cl4admin', 'values_not_valid_multiple', array(
 								':record_number' => ($num + 1),
-								':validate_errors' => Message::add_validate_errors($validate, $this->model_name)
+								':validate_errors' => Message::add_validate_errors($exception)
 							), Message::$error);
 						}
 					} // if
@@ -542,7 +541,7 @@ class Controller_cl4_cl4Admin extends Controller_Base {
 
 		try {
 			// get the target column
-			$column_name = Request::instance()->param('column_name');
+			$column_name = Request::current()->param('column_name');
 
 			$this->load_model();
 
@@ -634,7 +633,7 @@ class Controller_cl4_cl4Admin extends Controller_Base {
 	*/
 	public function check_perm($action = NULL, $model_name = NULL) {
 		if ($action === NULL) {
-			$action = Request::instance()->action;
+			$action = Request::current()->action();
 		}
 		if ($model_name === NULL) {
 			$model_name = $this->model_name;
@@ -708,7 +707,7 @@ class Controller_cl4_cl4Admin extends Controller_Base {
 	*/
 	function redirect_to_index() {
 		try {
-			Request::instance()->redirect('/' . Route::get(Route::name(Request::instance()->route))->uri(array('model' => $this->model_name, 'action' => 'index')));
+			Request::current()->redirect('/' . Route::get(Route::name(Request::current()->route()))->uri(array('model' => $this->model_name, 'action' => 'index')));
 		} catch (Exception $e) {
 			cl4::exception_handler($e);
 		}
@@ -757,9 +756,9 @@ class Controller_cl4_cl4Admin extends Controller_Base {
 			$db_group = cl4::get_param('db_group', Database::$default);
 
 			// generate a sample model file for the given table based on the database definition
-			$this->request->response = ModelCreate::create_model($this->model_name, array(
-				'db_group' => $db_group,
-			));
+			$this->response->body(ModelCreate::create_model($this->model_name, array(
+					'db_group' => $db_group,
+				)));
 		} catch (Exception $e) {
 			cl4::exception_handler($e);
 			echo Kohana::message('cl4admin', 'error_creating');
