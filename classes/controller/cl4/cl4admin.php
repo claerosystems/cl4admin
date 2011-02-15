@@ -361,7 +361,7 @@ class Controller_cl4_cl4Admin extends Controller_Base {
 			$this->redirect_to_index();
 		} catch (ORM_Validation_Exception $e) {
 			Message::message('cl4admin', 'values_not_valid', array(
-				':validate_errors' => Message::add_validate_errors($this->target_object->validation(), $this->model_name)
+				':validate_errors' => Message::add_validate_errors($e, $this->model_name)
 			), Message::$error);
 		} catch (Exception $e) {
 			cl4::exception_handler($e);
@@ -400,22 +400,15 @@ class Controller_cl4_cl4Admin extends Controller_Base {
 			// If form was submitted
 			if ( ! empty($_POST)) {
 				try {
-					$valid = $orm_multiple->save_values()->check();
-
-					if ($valid === TRUE) {
-						$orm_multiple->save();
-						Message::message('cl4admin', 'multiple_saved', array(':records_saved' => $orm_multiple->records_saved()), Message::$notice);
-						$this->redirect_to_index();
-					} else {
-						$validation_exceptions = $orm_multiple->validation_exceptions();
-						$error_messages = array();
-						foreach ($validation_exceptions as $num => $exception) {
-							Message::message('cl4admin', 'values_not_valid_multiple', array(
-								':record_number' => ($num + 1),
-								':validate_errors' => Message::add_validate_errors($exception)
-							), Message::$error);
-						}
-					} // if
+					$orm_multiple->save_values()->save();
+				} catch (ORM_Validation_Exception $e) {
+					$validation_exceptions = $orm_multiple->validation_exceptions();
+					foreach ($validation_exceptions as $num => $exception) {
+						Message::message('cl4admin', 'values_not_valid_multiple', array(
+							':record_number' => ($num + 1),
+							':validate_errors' => Message::add_validate_errors($exception)
+						), Message::$error);
+					}
 				} catch (Exception $e) {
 					cl4::exception_handler($e);
 					Message::message('cl4admin', 'error_saving', NULL, Message::$error);
@@ -450,21 +443,15 @@ class Controller_cl4_cl4Admin extends Controller_Base {
 				$ids = NULL;
 
 				try {
-					$valid = $orm_multiple->save_values()->check();
-
-					if ($valid === TRUE) {
-						$orm_multiple->save();
-						Message::message('cl4admin', 'multiple_saved', array(':records_saved' => $orm_multiple->records_saved()), Message::$notice);
-						$this->redirect_to_index();
-					} else {
-						$validation_exceptions = $orm_multiple->validation_exceptions();
-						foreach ($validation_exceptions as $num => $exception) {
-							Message::message('cl4admin', 'values_not_valid_multiple', array(
-								':record_number' => ($num + 1),
-								':validate_errors' => Message::add_validate_errors($exception)
-							), Message::$error);
-						}
-					} // if
+					$orm_multiple->save_values()->save();
+				} catch (ORM_Validation_Exception $e) {
+					$validation_exceptions = $orm_multiple->validation_exceptions();
+					foreach ($validation_exceptions as $num => $exception) {
+						Message::message('cl4admin', 'values_not_valid_multiple', array(
+							':record_number' => ($num + 1),
+							':validate_errors' => Message::add_validate_errors($exception)
+						), Message::$error);
+					}
 				} catch (Exception $e) {
 					cl4::exception_handler($e);
 					Message::message('cl4admin', 'error_saving', NULL, Message::$error);
