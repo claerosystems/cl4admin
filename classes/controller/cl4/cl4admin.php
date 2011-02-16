@@ -361,7 +361,7 @@ class Controller_cl4_cl4Admin extends Controller_Base {
 			$this->redirect_to_index();
 		} catch (ORM_Validation_Exception $e) {
 			Message::message('cl4admin', 'values_not_valid', array(
-				':validate_errors' => Message::add_validate_errors($e, $this->model_name)
+				':validation_errors' => Message::add_validation_errors($e, $this->model_name)
 			), Message::$error);
 		} catch (Exception $e) {
 			cl4::exception_handler($e);
@@ -406,7 +406,7 @@ class Controller_cl4_cl4Admin extends Controller_Base {
 					foreach ($validation_exceptions as $num => $exception) {
 						Message::message('cl4admin', 'values_not_valid_multiple', array(
 							':record_number' => ($num + 1),
-							':validate_errors' => Message::add_validate_errors($exception)
+							':validation_errors' => Message::add_validation_errors($exception)
 						), Message::$error);
 					}
 				} catch (Exception $e) {
@@ -449,7 +449,7 @@ class Controller_cl4_cl4Admin extends Controller_Base {
 					foreach ($validation_exceptions as $num => $exception) {
 						Message::message('cl4admin', 'values_not_valid_multiple', array(
 							':record_number' => ($num + 1),
-							':validate_errors' => Message::add_validate_errors($exception)
+							':validation_errors' => Message::add_validation_errors($exception)
 						), Message::$error);
 					}
 				} catch (Exception $e) {
