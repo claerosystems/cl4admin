@@ -401,6 +401,8 @@ class Controller_cl4_cl4Admin extends Controller_Base {
 			if ( ! empty($_POST)) {
 				try {
 					$orm_multiple->save_values()->save();
+					Message::message('cl4admin', 'multiple_saved', array(':records_saved' => $orm_multiple->records_saved()), Message::$notice);
+					$this->redirect_to_index();
 				} catch (ORM_Validation_Exception $e) {
 					$validation_exceptions = $orm_multiple->validation_exceptions();
 					foreach ($validation_exceptions as $num => $exception) {
@@ -444,6 +446,8 @@ class Controller_cl4_cl4Admin extends Controller_Base {
 
 				try {
 					$orm_multiple->save_values()->save();
+					Message::message('cl4admin', 'multiple_saved', array(':records_saved' => $orm_multiple->records_saved()), Message::$notice);
+					$this->redirect_to_index();
 				} catch (ORM_Validation_Exception $e) {
 					$validation_exceptions = $orm_multiple->validation_exceptions();
 					foreach ($validation_exceptions as $num => $exception) {
