@@ -38,10 +38,10 @@ class Controller_cl4_cl4Admin extends Controller_Base {
 		parent::before();
 
 		// set up the default database group
-		$this->db_group = Kohana::config('cl4admin.db_group');
+		$this->db_group = Kohana::$config->load('cl4admin.db_group');
 
 		// assign the name of the default session array
-		$this->session_key = Kohana::config('cl4admin.session_key');
+		$this->session_key = Kohana::$config->load('cl4admin.session_key');
 
 		// set the information from the route/get/post parameters
 		$this->model_name = Request::current()->param('model');
@@ -81,7 +81,7 @@ class Controller_cl4_cl4Admin extends Controller_Base {
 		// check to see the user has permission to access this action
 		// determine what action we should use to determine if they have permission
 		// get config and then check to see if the current action is defined in the array, otherwise use the action
-		$action_to_perm = Kohana::config('cl4admin.action_to_permission');
+		$action_to_perm = Kohana::$config->load('cl4admin.action_to_permission');
 		$perm_action = Arr::get($action_to_perm, $action, $action);
 		if ( ! $this->check_perm($perm_action)) {
 			// we can't use the default functionality of secure_actions because we have 2 possible permissions per action: global and per model
@@ -107,7 +107,7 @@ class Controller_cl4_cl4Admin extends Controller_Base {
 		// or we are looking at a new model
 		if ( ! isset($this->session[$this->session_key][$this->model_name])) {
 			// set all the defaults for this model/object
-			$this->session[$this->session_key][$this->model_name] = Kohana::config('cl4admin.default_list_options');
+			$this->session[$this->session_key][$this->model_name] = Kohana::$config->load('cl4admin.default_list_options');
 		}
 
 		$this->model_session =& $this->session[$this->session_key][$this->model_name];
@@ -604,7 +604,7 @@ class Controller_cl4_cl4Admin extends Controller_Base {
 	public function action_cancel_search() {
 		try {
 			// reset the search and search in the session
-			$this->model_session = Kohana::config('cl4admin.default_list_options');
+			$this->model_session = Kohana::$config->load('cl4admin.default_list_options');
 
 			$this->redirect_to_index();
 		} catch (Exception $e) {
@@ -671,7 +671,7 @@ class Controller_cl4_cl4Admin extends Controller_Base {
 	*
 	*/
 	public function get_model_list() {
-		$model_list = Kohana::config('cl4admin.model_list');
+		$model_list = Kohana::$config->load('cl4admin.model_list');
 		if ($model_list === NULL) $model_list = array();
 
 		// remove any models that have name that are empty (NULL, FALSE, etc)
@@ -690,7 +690,7 @@ class Controller_cl4_cl4Admin extends Controller_Base {
 	* @return string
 	*/
 	public function get_default_model() {
-		return Kohana::config('cl4admin.default_model');
+		return Kohana::$config->load('cl4admin.default_model');
 	}
 
 	/**
@@ -725,7 +725,7 @@ class Controller_cl4_cl4Admin extends Controller_Base {
 			$table_list = Database::instance($db_group)->list_tables();
 			$table_list = array_combine($table_list, $table_list);
 
-			$db_list = array_keys((array) Kohana::config('database'));
+			$db_list = array_keys((array) Kohana::$config->load('database'));
 			$db_list = array_combine($db_list, $db_list);
 
 			$this->template->scripts['model_create'] = 'cl4/js/model_create.js';
