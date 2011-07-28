@@ -175,7 +175,7 @@ class Controller_cl4_cl4Admin extends Controller_Base {
 
 		} catch (Exception $e) {
 			// display the error message
-			cl4::exception_handler($e);
+			Kohana_Exception::caught_handler($e);
 			Message::message('cl4admin', 'problem_loading_data', NULL, Message::$error);
 			Message::message('cl4admin', 'problem_loading_model', array(':model_name' => $this->model_name), Message::$debug);
 
@@ -245,7 +245,7 @@ class Controller_cl4_cl4Admin extends Controller_Base {
 
 			$view_content .= $orm_multiple->get_editable_list($options);
 		} catch (Exception $e) {
-			cl4::exception_handler($e);
+			Kohana_Exception::caught_handler($e);
 			$view_content .= Kohana::message('cl4admin', 'problem_preparing');
 		}
 
@@ -316,7 +316,7 @@ class Controller_cl4_cl4Admin extends Controller_Base {
 
 			$this->add_admin_view($view_title, $view_content);
 		} catch (Exception $e) {
-			cl4::exception_handler($e);
+			Kohana_Exception::caught_handler($e);
 			Message::message('cl4admin', 'error_preparing_add', NULL, Message::$error);
 			if ( ! cl4::is_dev()) $this->redirect_to_index();
 		}
@@ -339,7 +339,7 @@ class Controller_cl4_cl4Admin extends Controller_Base {
 			));
 			$this->add_admin_view($view_title, $view_content);
 		} catch (Exception $e) {
-			cl4::exception_handler($e);
+			Kohana_Exception::caught_handler($e);
 			Message::message('cl4admin', 'error_preparing_edit', NULL, Message::$error);
 			if ( ! cl4::is_dev()) $this->redirect_to_index();
 		} // try
@@ -364,7 +364,7 @@ class Controller_cl4_cl4Admin extends Controller_Base {
 				':validation_errors' => Message::add_validation_errors($e, $this->model_name)
 			), Message::$error);
 		} catch (Exception $e) {
-			cl4::exception_handler($e);
+			Kohana_Exception::caught_handler($e);
 			Message::message('cl4admin', 'problem_saving', NULL, Message::$error);
 			if ( ! cl4::is_dev()) $this->redirect_to_index();
 		} // try
@@ -383,7 +383,7 @@ class Controller_cl4_cl4Admin extends Controller_Base {
 
 			$this->add_admin_view(HTML::chars($this->model_display_name), $this->target_object->get_view());
 		} catch (Exception $e) {
-			cl4::exception_handler($e);
+			Kohana_Exception::caught_handler($e);
 			Message::message('cl4admin', 'error_viewing', NULL, Message::$error);
 			if ( ! cl4::is_dev()) $this->redirect_to_index();
 		}
@@ -412,7 +412,7 @@ class Controller_cl4_cl4Admin extends Controller_Base {
 						), Message::$error);
 					}
 				} catch (Exception $e) {
-					cl4::exception_handler($e);
+					Kohana_Exception::caught_handler($e);
 					Message::message('cl4admin', 'error_saving', NULL, Message::$error);
 				}
 			} // if
@@ -427,7 +427,7 @@ class Controller_cl4_cl4Admin extends Controller_Base {
 			// Add view to template
 			$this->add_admin_view($view_title, $view_content);
 		} catch (Exception $e) {
-			cl4::exception_handler($e);
+			Kohana_Exception::caught_handler($e);
 			Message::message('cl4admin', 'error_preparing_add', NULL, Message::$error);
 			if ( ! cl4::is_dev()) $this->redirect_to_index();
 		}
@@ -457,7 +457,7 @@ class Controller_cl4_cl4Admin extends Controller_Base {
 						), Message::$error);
 					}
 				} catch (Exception $e) {
-					cl4::exception_handler($e);
+					Kohana_Exception::caught_handler($e);
 					Message::message('cl4admin', 'error_saving', NULL, Message::$error);
 				}
 			} else {
@@ -468,7 +468,7 @@ class Controller_cl4_cl4Admin extends Controller_Base {
 			$view_content = $orm_multiple->get_edit_multiple($ids);
 			$this->add_admin_view($view_title, $view_content);
 		} catch (Exception $e) {
-			cl4::exception_handler($e);
+			Kohana_Exception::caught_handler($e);
 			Message::message('cl4admin', 'error_preparing_edit', NULL, Message::$error);
 			if ( ! cl4::is_dev()) $this->redirect_to_index();
 		}
@@ -497,7 +497,7 @@ class Controller_cl4_cl4Admin extends Controller_Base {
 							Message::message('cl4admin', 'record_id_deleted', array(':id' => $this->id), Message::$debug);
 						} // if
 					} catch (Exception $e) {
-						cl4::exception_handler($e);
+						Kohana_Exception::caught_handler($e);
 						Message::message('cl4admin', 'error_deleting', NULL, Message::$error);
 						if ( ! cl4::is_dev()) $this->redirect_to_index();
 					}
@@ -516,7 +516,7 @@ class Controller_cl4_cl4Admin extends Controller_Base {
 				$this->add_admin_view(HTML::chars($this->model_display_name), $this->target_object->get_view());
 			}
 		} catch (Exception $e) {
-			cl4::exception_handler($e);
+			Kohana_Exception::caught_handler($e);
 			Message::message('cl4admin', 'error_preparing_delete', NULL, Message::$error);
 			if ( ! cl4::is_dev()) $this->redirect_to_index();
 		}
@@ -556,7 +556,7 @@ class Controller_cl4_cl4Admin extends Controller_Base {
 				throw new Kohana_Exception('There is no file associated with the record');
 			} // if
 		} catch (Exception $e) {
-			cl4::exception_handler($e);
+			Kohana_Exception::caught_handler($e);
 			echo Kohana::message('cl4admin', 'problem_downloading');
 		}
 	} // function download
@@ -592,7 +592,7 @@ class Controller_cl4_cl4Admin extends Controller_Base {
 				$this->add_admin_view($view_title, $view_content);
 			}
 		} catch (Exception $e) {
-			cl4::exception_handler($e);
+			Kohana_Exception::caught_handler($e);
 			Message::message('cl4admin', 'error_preparing_search', NULL, Message::$error);
 			if ( ! cl4::is_dev()) $this->redirect_to_index();
 		}
@@ -608,7 +608,7 @@ class Controller_cl4_cl4Admin extends Controller_Base {
 
 			$this->redirect_to_index();
 		} catch (Exception $e) {
-			cl4::exception_handler($e);
+			Kohana_Exception::caught_handler($e);
 			Message::message('cl4admin', 'error_clearing_search', NULL, Message::$error);
 			if ( ! cl4::is_dev()) $this->redirect_to_index();
 		}
@@ -658,7 +658,7 @@ class Controller_cl4_cl4Admin extends Controller_Base {
 				'form_action' => URL::site(Request::current()->uri()) . URL::query(),
 			));
 		} catch (Exception $e) {
-			cl4::exception_handler($e);
+			Kohana_Exception::caught_handler($e);
 			// return an empty string because there is no proper message that can be displayed
 			$return_html = '';
 		}
@@ -700,7 +700,7 @@ class Controller_cl4_cl4Admin extends Controller_Base {
 		try {
 			Request::current()->redirect('/' . Route::get(Route::name(Request::current()->route()))->uri(array('model' => $this->model_name, 'action' => 'index')));
 		} catch (Exception $e) {
-			cl4::exception_handler($e);
+			Kohana_Exception::caught_handler($e);
 		}
 	} // function
 
@@ -730,7 +730,7 @@ class Controller_cl4_cl4Admin extends Controller_Base {
 
 			$this->template->scripts['model_create'] = 'cl4/js/model_create.js';
 		} catch (Exception $e) {
-			cl4::exception_handler($e);
+			Kohana_Exception::caught_handler($e);
 			Message::message('cl4admin', 'error_preparing_create', NULL, Message::$error);
 		}
 	} // function action_model_create
@@ -751,7 +751,7 @@ class Controller_cl4_cl4Admin extends Controller_Base {
 					'db_group' => $db_group,
 				)));
 		} catch (Exception $e) {
-			cl4::exception_handler($e);
+			Kohana_Exception::caught_handler($e);
 			echo Kohana::message('cl4admin', 'error_creating');
 		}
 	} // function
