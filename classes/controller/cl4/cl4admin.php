@@ -309,7 +309,7 @@ class Controller_cl4_cl4Admin extends Controller_Base {
 			);
 			if ( ! empty($this->id)) {
 				// set the form action because the current url includes the id of the record which will cause an update, not an add
-				$form_options['form_action'] = URL::site(Request::current()->route()->uri(array('id' => NULL))) . URL::query();
+				$form_options['form_action'] = URL::site(Request::current()->route()->uri(array('model' => $this->model_name, 'action' => 'add'))) . URL::query();
 			}
 
 			$view_content = $this->target_object->get_form($form_options);
