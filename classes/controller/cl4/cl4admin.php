@@ -226,6 +226,7 @@ class Controller_cl4_cl4Admin extends Controller_Base {
 				),
 				'top_bar_buttons' => array(
 					'add' => $this->check_perm('add'),             // add (add new) button
+					'add_multiple' => $this->check_perm('add'),    // add multiple button
 					'edit' => $this->check_perm('edit'),            // edit (edit selected) button
 					'export_selected' => $this->check_perm('export'), // export selected button
 					'export_all' => $this->check_perm('export'),      // export all button
