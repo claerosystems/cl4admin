@@ -41,4 +41,5 @@ return array(
 	'error_clearing_search'     => 'There was an error while clearing the search.',
 	'error_preparing_create'    => 'There was an problem while preparing the model create view.',
 	'error_creating'            => 'There was an error while problem while creating the ORM model.',
+	'error_exporting'           => 'There was a problem generating the export.',
 );
