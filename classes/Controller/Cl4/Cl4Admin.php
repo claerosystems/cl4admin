@@ -3,7 +3,7 @@
 /**
 * This controller handles the features of add, edit, delete, etc. of database records
 */
-class Controller_cl4_cl4Admin extends Controller_Base {
+class Controller_Cl4_Cl4Admin extends Controller_Base {
 	protected $db_group; // the default database config to use, needed for when a specific model is not loaded
 	protected $model_name; // the name of the model currently being manipulated
 	protected $model_display_name; // the fulll, friendly object name as specified in the options or the model itself
@@ -46,9 +46,9 @@ class Controller_cl4_cl4Admin extends Controller_Base {
 		// set the information from the route/get/post parameters
 		$this->model_name = Request::current()->param('model');
 		$this->id = Request::current()->param('id');
-		$page_offset = cl4::get_param('page');
-		$sort_column = cl4::get_param('sort_by_column');
-		$sort_order = cl4::get_param('sort_by_order');
+		$page_offset = Cl4::get_param('page');
+		$sort_column = Cl4::get_param('sort_by_column');
+		$sort_order = Cl4::get_param('sort_by_order');
 
 		// get the model list from the config file
 		$model_list = $this->get_model_list();
@@ -97,7 +97,7 @@ class Controller_cl4_cl4Admin extends Controller_Base {
 		} // if
 
 		// redirect the user to a different model as they one they selected isn't valid (not in array of models)
-		if ( ! isset($model_list[$this->model_name]) && ((cl4::is_dev() && $action != 'create' && $action != 'model_create') || ! cl4::is_dev())) {
+		if ( ! isset($model_list[$this->model_name]) && ((Cl4::is_dev() && $action != 'create' && $action != 'model_create') || ! Cl4::is_dev())) {
 			Message::message('cl4admin', 'model_not_defined', array(':model_name' => $this->model_name), Message::$debug);
 			Request::current()->redirect('dbadmin/' . $default_model . '/index');
 		}
@@ -169,7 +169,7 @@ class Controller_cl4_cl4Admin extends Controller_Base {
 			if ($this->auto_render) $this->template->page_title = $this->target_object->_table_name_display . ' Administration' . $this->template->page_title;
 
 			// generate the friendly model name used to display to the user
-			$this->model_display_name = ( ! empty($this->target_object->_table_name_display) ? $this->target_object->_table_name_display : cl4::underscores_to_words($this->model_name));
+			$this->model_display_name = ( ! empty($this->target_object->_table_name_display) ? $this->target_object->_table_name_display : Cl4::underscores_to_words($this->model_name));
 
 			Message::message('cl4admin', 'model_loaded', array(':model_name' => $this->model_name), Message::$debug);
 
@@ -180,7 +180,7 @@ class Controller_cl4_cl4Admin extends Controller_Base {
 			Message::message('cl4admin', 'problem_loading_model', array(':model_name' => $this->model_name), Message::$debug);
 
 			// display the help view
-			if (cl4::is_dev() && $e->getCode() == 3001) {
+			if (Cl4::is_dev() && $e->getCode() == 3001) {
 				Message::message('cl4admin', 'model_dne', array(':model_name' => $this->model_name), Message::$debug);
 				if ($this->auto_render && $this->model_name != key($model_list)) {
 					Request::current()->redirect('dbadmin/' . key($model_list) . '/model_create?' . http_build_query(array('table_name' => $this->model_name)));
@@ -319,7 +319,7 @@ class Controller_cl4_cl4Admin extends Controller_Base {
 		} catch (Exception $e) {
 			Kohana_Exception::caught_handler($e);
 			Message::message('cl4admin', 'error_preparing_add', NULL, Message::$error);
-			if ( ! cl4::is_dev()) $this->redirect_to_index();
+			if ( ! Cl4::is_dev()) $this->redirect_to_index();
 		}
 	} // function action_add
 
@@ -342,7 +342,7 @@ class Controller_cl4_cl4Admin extends Controller_Base {
 		} catch (Exception $e) {
 			Kohana_Exception::caught_handler($e);
 			Message::message('cl4admin', 'error_preparing_edit', NULL, Message::$error);
-			if ( ! cl4::is_dev()) $this->redirect_to_index();
+			if ( ! Cl4::is_dev()) $this->redirect_to_index();
 		} // try
 	} // function action_edit
 
@@ -367,7 +367,7 @@ class Controller_cl4_cl4Admin extends Controller_Base {
 		} catch (Exception $e) {
 			Kohana_Exception::caught_handler($e);
 			Message::message('cl4admin', 'problem_saving', NULL, Message::$error);
-			if ( ! cl4::is_dev()) $this->redirect_to_index();
+			if ( ! Cl4::is_dev()) $this->redirect_to_index();
 		} // try
 	} // function save_model
 
@@ -386,7 +386,7 @@ class Controller_cl4_cl4Admin extends Controller_Base {
 		} catch (Exception $e) {
 			Kohana_Exception::caught_handler($e);
 			Message::message('cl4admin', 'error_viewing', NULL, Message::$error);
-			if ( ! cl4::is_dev()) $this->redirect_to_index();
+			if ( ! Cl4::is_dev()) $this->redirect_to_index();
 		}
 	} // function
 
@@ -430,7 +430,7 @@ class Controller_cl4_cl4Admin extends Controller_Base {
 		} catch (Exception $e) {
 			Kohana_Exception::caught_handler($e);
 			Message::message('cl4admin', 'error_preparing_add', NULL, Message::$error);
-			if ( ! cl4::is_dev()) $this->redirect_to_index();
+			if ( ! Cl4::is_dev()) $this->redirect_to_index();
 		}
 	} // function action_add_multiple
 
@@ -471,7 +471,7 @@ class Controller_cl4_cl4Admin extends Controller_Base {
 		} catch (Exception $e) {
 			Kohana_Exception::caught_handler($e);
 			Message::message('cl4admin', 'error_preparing_edit', NULL, Message::$error);
-			if ( ! cl4::is_dev()) $this->redirect_to_index();
+			if ( ! Cl4::is_dev()) $this->redirect_to_index();
 		}
 	} // function action_edit_multiple
 
@@ -500,7 +500,7 @@ class Controller_cl4_cl4Admin extends Controller_Base {
 					} catch (Exception $e) {
 						Kohana_Exception::caught_handler($e);
 						Message::message('cl4admin', 'error_deleting', NULL, Message::$error);
-						if ( ! cl4::is_dev()) $this->redirect_to_index();
+						if ( ! Cl4::is_dev()) $this->redirect_to_index();
 					}
 				} else {
 					Message::message('cl4admin', 'item_not_deleted', NULL, Message::$notice);
@@ -519,7 +519,7 @@ class Controller_cl4_cl4Admin extends Controller_Base {
 		} catch (Exception $e) {
 			Kohana_Exception::caught_handler($e);
 			Message::message('cl4admin', 'error_preparing_delete', NULL, Message::$error);
-			if ( ! cl4::is_dev()) $this->redirect_to_index();
+			if ( ! Cl4::is_dev()) $this->redirect_to_index();
 		}
 	} // function action_delete
 
@@ -643,7 +643,7 @@ class Controller_cl4_cl4Admin extends Controller_Base {
 		} catch (Exception $e) {
 			Kohana_Exception::caught_handler($e);
 			Message::message('cl4admin', 'error_preparing_search', NULL, Message::$error);
-			if ( ! cl4::is_dev()) $this->redirect_to_index();
+			if ( ! Cl4::is_dev()) $this->redirect_to_index();
 		}
 	} // function
 
@@ -659,7 +659,7 @@ class Controller_cl4_cl4Admin extends Controller_Base {
 		} catch (Exception $e) {
 			Kohana_Exception::caught_handler($e);
 			Message::message('cl4admin', 'error_clearing_search', NULL, Message::$error);
-			if ( ! cl4::is_dev()) $this->redirect_to_index();
+			if ( ! Cl4::is_dev()) $this->redirect_to_index();
 		}
 	} // function action_cancel_search
 
@@ -763,10 +763,10 @@ class Controller_cl4_cl4Admin extends Controller_Base {
 	*/
 	public function action_model_create() {
 		try {
-			$db_group = cl4::get_param('db_group', Database::$default);
+			$db_group = Cl4::get_param('db_group', Database::$default);
 
 			$this->template->body_html = View::factory('cl4/cl4admin/model_create')
-				->set('table_name', cl4::get_param('table_name'))
+				->set('table_name', Cl4::get_param('table_name'))
 				->set('db_group', $db_group)
 				->bind('db_list', $db_list)
 				->bind('table_list', $table_list);
@@ -793,7 +793,7 @@ class Controller_cl4_cl4Admin extends Controller_Base {
 			// we don't want the template controller automatically adding all the html
 			$this->auto_render = FALSE;
 
-			$db_group = cl4::get_param('db_group', Database::$default);
+			$db_group = Cl4::get_param('db_group', Database::$default);
 
 			// generate a sample model file for the given table based on the database definition
 			$this->response->body(ModelCreate::create_model($this->model_name, array(
